@@ -1,12 +1,24 @@
 package balancetalk.talkpick.application;
 
-import balancetalk.file.domain.repository.FileRepository;
+import static balancetalk.vote.domain.VoteOption.A;
+import static balancetalk.vote.domain.VoteOption.B;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import balancetalk.member.domain.Member;
 import balancetalk.member.dto.GuestOrApiMember;
 import balancetalk.talkpick.domain.Summary;
 import balancetalk.talkpick.domain.TalkPick;
+import balancetalk.talkpick.domain.TalkPickFileHandler;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.talkpick.dto.TalkPickDto.TalkPickDetailResponse;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,15 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static balancetalk.vote.domain.VoteOption.A;
-import static balancetalk.vote.domain.VoteOption.B;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TalkPickServiceTest {
@@ -34,7 +37,7 @@ class TalkPickServiceTest {
     TalkPickRepository talkPickRepository;
 
     @Mock
-    FileRepository fileRepository;
+    TalkPickFileHandler talkPickFileHandler;
 
     TalkPick talkPick;
     GuestOrApiMember guestOrApiMember;
@@ -66,6 +69,8 @@ class TalkPickServiceTest {
         // given
         when(talkPickRepository.findById(1L)).thenReturn(Optional.ofNullable(talkPick));
         when(guestOrApiMember.isGuest()).thenReturn(true);
+        when(talkPickFileHandler.findImgUrlsBy(1L)).thenReturn(any());
+        when(talkPickFileHandler.findFileIdsBy(1L)).thenReturn(any());
 
         // when
         talkPickService.findById(1L, guestOrApiMember);
@@ -80,7 +85,8 @@ class TalkPickServiceTest {
         // given
         when(talkPickRepository.findById(1L)).thenReturn(Optional.ofNullable(talkPick));
         when(guestOrApiMember.isGuest()).thenReturn(true);
-        when(fileRepository.findImgUrlsByResourceIdAndFileType(any(), any())).thenReturn(List.of());
+        when(talkPickFileHandler.findImgUrlsBy(anyLong())).thenReturn(List.of());
+        when(talkPickFileHandler.findFileIdsBy(anyLong())).thenReturn(List.of());
 
         // when
         TalkPickDetailResponse result = talkPickService.findById(1L, guestOrApiMember);
@@ -95,6 +101,8 @@ class TalkPickServiceTest {
         // given
         when(talkPickRepository.findById(1L)).thenReturn(Optional.ofNullable(talkPick));
         when(guestOrApiMember.isGuest()).thenReturn(true);
+        when(talkPickFileHandler.findImgUrlsBy(anyLong())).thenReturn(List.of());
+        when(talkPickFileHandler.findFileIdsBy(anyLong())).thenReturn(List.of());
 
         // when
         TalkPickDetailResponse result = talkPickService.findById(1L, guestOrApiMember);
