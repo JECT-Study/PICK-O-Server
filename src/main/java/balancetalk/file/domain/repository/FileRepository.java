@@ -10,4 +10,6 @@ public interface FileRepository extends JpaRepository<File, Long>, FileRepositor
     void deleteByResourceIdAndFileType(Long tempTalkPickId, FileType fileType);
 
     void deleteByResourceIdInAndFileType(List<Long> ids, FileType fileType);
+
+    boolean existsByResourceIdAndFileType(Long talkPickId, FileType fileType);
 }
