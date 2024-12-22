@@ -22,6 +22,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,5 +144,12 @@ public class TalkPick extends BaseTimeEntity {
             this.notificationHistory = new NotificationHistory();
         }
         return this.notificationHistory;
+    }
+
+    public TodayTalkPick toTodayTalkPick() {
+        return TodayTalkPick.builder()
+                .pickDate(LocalDate.now())
+                .talkPick(this)
+                .build();
     }
 }

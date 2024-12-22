@@ -1,21 +1,19 @@
 package balancetalk.talkpick.domain.repository;
 
+import static balancetalk.global.utils.QuerydslUtils.getOrderSpecifiers;
+import static balancetalk.talkpick.domain.QTalkPick.talkPick;
+import static balancetalk.talkpick.dto.TalkPickDto.TalkPickResponse;
+import static balancetalk.vote.domain.QTalkPickVote.talkPickVote;
+
+import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.dto.QTalkPickDto_TalkPickResponse;
-import balancetalk.talkpick.dto.QTodayTalkPickDto_TodayTalkPickResponse;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-
-import java.util.List;
-
-import static balancetalk.global.utils.QuerydslUtils.getOrderSpecifiers;
-import static balancetalk.talkpick.domain.QTalkPick.talkPick;
-import static balancetalk.talkpick.dto.TalkPickDto.TalkPickResponse;
-import static balancetalk.talkpick.dto.TodayTalkPickDto.TodayTalkPickResponse;
-import static balancetalk.vote.domain.QTalkPickVote.talkPickVote;
 
 @RequiredArgsConstructor
 public class TalkPickRepositoryImpl implements TalkPickRepositoryCustom {
@@ -23,17 +21,15 @@ public class TalkPickRepositoryImpl implements TalkPickRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public TodayTalkPickResponse findTodayTalkPick() {
+    public List<TalkPick> findCandidateTodayTalkPicks(int topN, List<TalkPick> yesterdayTalkPicks) {
         return queryFactory
-                .select(new QTodayTalkPickDto_TodayTalkPickResponse(
-                        talkPick.id, talkPick.title, talkPick.optionA, talkPick.optionB
-                ))
-                .from(talkPick)
+                .selectFrom(talkPick)
                 .leftJoin(talkPick.votes, talkPickVote)
+                .where(talkPick.notIn(yesterdayTalkPicks))
                 .groupBy(talkPick.id)
                 .orderBy(talkPick.views.desc(), talkPickVote.count().desc(), talkPick.createdAt.desc())
-                .limit(1)
-                .fetchOne();
+                .limit(topN)
+                .fetch();
     }
 
     @Override
