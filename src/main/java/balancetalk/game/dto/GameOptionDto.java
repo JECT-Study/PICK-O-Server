@@ -35,10 +35,11 @@ public class GameOptionDto {
     @Schema(description = "선택지", example = "A")
     private VoteOption optionType;
 
-    public static GameOptionDto fromEntity(GameOption gameOption, String imgUrl) {
+    public static GameOptionDto fromEntity(GameOption gameOption, Long fileId, String imgUrl) {
         return GameOptionDto.builder()
                 .id(gameOption.getId())
                 .name(gameOption.getName())
+                .fileId(fileId)
                 .imgUrl(imgUrl)
                 .description(gameOption.getDescription())
                 .optionType(gameOption.getOptionType())

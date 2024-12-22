@@ -59,8 +59,9 @@ public class TempGameDto {
     ) {
         return tempGame.getTempGameOptions().stream()
                 .map(option -> {
+                    Long fileId = option.getImgId();
                     String imgUrl = tempGameOptionImgUrls.get(option.getId());
-                    return TempGameOptionDto.fromEntity(option, option.getImgId(), imgUrl);
+                    return TempGameOptionDto.fromEntity(option, fileId, imgUrl);
                 })
                 .toList();
     }

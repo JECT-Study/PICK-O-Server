@@ -1,0 +1,41 @@
+Configuration:
+  name: Logger-prod
+  status: info
+
+  Appenders:
+    RollingFile:
+      name: RollingFile_Appender
+      fileName: ${sys:LOG_DIR}/logfile.log
+      filePattern: "${sys:LOG_DIR}/logfile-%d{yyyy-MM-dd}.%i.txt"
+      PatternLayout:
+        pattern: "%style{%d{yyyy-MM-dd HH:mm:ss.SSS}{GMT+9}}{cyan} %highlight{[%-5p]}{FATAL=bg_red,
+            ERROR=red, INFO=green, DEBUG=blue, TRACE=bg_yellow} [%C] %style{[%t]}{yellow}- %m%n"
+      # immediateFlush: false   # async 방식으로 버퍼를 통해 로그 남기기
+
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: "10 MB"
+        TimeBasedTriggeringPolicy:
+          Interval: 1   # 하루마다 rollover 발생
+          modulate: true
+
+      DefaultRollOverStrategy:
+        max: 10
+        Delete:
+          basePath: ${sys:LOG_DIR}
+          maxDepth: "1"   # 디렉토리 깊이
+          IfLastModified:
+            age: "P7D"   # 파일을 7일동안 보관
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        ref: RollingFile_Appender
+    Logger:
+      name: picko-prod
+      additivity: false
+      level: info
+      includeLocation: false
+      AppenderRef:
+        ref: RollingFile_Appender

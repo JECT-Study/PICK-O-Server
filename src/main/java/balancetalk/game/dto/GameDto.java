@@ -221,8 +221,9 @@ public class GameDto {
     public static List<GameOptionDto> getGameOptionDtos(Game game, Map<Long, String> gameOptionImgUrls) {
         return game.getGameOptions().stream()
                 .map(option -> {
+                    Long fileId = option.getImgId();
                     String imgUrl = gameOptionImgUrls.get(option.getId());
-                    return GameOptionDto.fromEntity(option, imgUrl);
+                    return GameOptionDto.fromEntity(option, fileId, imgUrl);
                 })
                 .toList();
     }

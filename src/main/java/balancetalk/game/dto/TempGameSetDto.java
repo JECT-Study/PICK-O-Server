@@ -15,7 +15,7 @@ import lombok.Builder;
 import lombok.Data;
 
 public class TempGameSetDto {
-    
+
     @Data
     public static class CreateTempGameSetRequest {
 
