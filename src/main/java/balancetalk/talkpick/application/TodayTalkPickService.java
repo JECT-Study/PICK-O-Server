@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class TodayTalkPickService {
     private int todayTalkPickCount;
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
     public void createTodayTalkPick() {
         List<TalkPick> candidateTodayTalkPicks = getCandidateTodayTalkPicks();
         Collections.shuffle(candidateTodayTalkPicks);
@@ -54,7 +56,10 @@ public class TodayTalkPickService {
                 .toList();
     }
 
-    public TodayTalkPickResponse findTodayTalkPick() {
-        return null;
+    public List<TodayTalkPickResponse> findTodayTalkPick() {
+        return todayTalkPickRepository.findByPickDate(LocalDate.now())
+                .stream()
+                .map(todayTalkPick -> TodayTalkPickResponse.from(todayTalkPick.getTalkPick()))
+                .toList();
     }
 }
