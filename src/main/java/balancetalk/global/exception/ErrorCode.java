@@ -88,7 +88,8 @@ public enum ErrorCode {
     FAIL_PARSE_NOTIFICATION_HISTORY(INTERNAL_SERVER_ERROR, "알림 내역 파싱에 실패했습니다."),
     FAIL_SERIALIZE_NOTIFICATION_HISTORY(INTERNAL_SERVER_ERROR, "알림 내역 직렬화에 실패했습니다."),
     FAIL_SORT(INTERNAL_SERVER_ERROR, "정렬에 실패했습니다."),
-    SUMMARY_SIZE_IS_OVER(INTERNAL_SERVER_ERROR, "요약 내용의 길이가 적정 기준을 초과했습니다.");
+    TALK_PICK_SUMMARY_SIZE_IS_OVER(INTERNAL_SERVER_ERROR, "요약 내용의 길이가 적정 기준을 초과했습니다."),
+    TALK_PICK_SUMMARY_FAILED(INTERNAL_SERVER_ERROR, "톡픽 요약에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

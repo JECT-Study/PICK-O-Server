@@ -1,6 +1,7 @@
 package balancetalk.talkpick.domain;
 
-import static balancetalk.global.exception.ErrorCode.SUMMARY_SIZE_IS_OVER;
+import static balancetalk.global.exception.ErrorCode.TALK_PICK_SUMMARY_FAILED;
+import static balancetalk.global.exception.ErrorCode.TALK_PICK_SUMMARY_SIZE_IS_OVER;
 import static balancetalk.talkpick.domain.SummaryStatus.FAIL;
 import static balancetalk.talkpick.domain.SummaryStatus.NOT_REQUIRED;
 import static balancetalk.talkpick.domain.SummaryStatus.SUCCESS;
@@ -63,10 +64,13 @@ public class TalkPickSummarizer {
 
         // 요약 수행
         Summary summary = getSummary(talkPick);
+        if (summary == null) {
+            throw new BalanceTalkException(TALK_PICK_SUMMARY_FAILED);
+        }
 
         // 요약 글자수 검증
         if (summary.isOverSize()) {
-            throw new BalanceTalkException(SUMMARY_SIZE_IS_OVER);
+            throw new BalanceTalkException(TALK_PICK_SUMMARY_SIZE_IS_OVER);
         }
 
         // 톡픽 요약 내용 및 상태 업데이트
@@ -86,7 +90,8 @@ public class TalkPickSummarizer {
     private Map<String, Object> getBaseTalkPickFieldsMap(TalkPick talkPick) {
         return OBJECT_MAPPER.convertValue(
                 getBaseTalkPickFields(talkPick),
-                new TypeReference<ConcurrentHashMap<String, Object>>() {});
+                new TypeReference<ConcurrentHashMap<String, Object>>() {
+                });
     }
 
     private BaseTalkPickFields getBaseTalkPickFields(TalkPick talkPick) {
