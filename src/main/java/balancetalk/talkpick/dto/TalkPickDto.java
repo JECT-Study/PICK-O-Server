@@ -7,6 +7,7 @@ import static balancetalk.vote.domain.VoteOption.B;
 import balancetalk.bookmark.domain.TalkPickBookmark;
 import balancetalk.comment.domain.Comment;
 import balancetalk.member.domain.Member;
+import balancetalk.talkpick.domain.SummaryStatus;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.dto.fields.BaseTalkPickFields;
 import balancetalk.talkpick.dto.fields.ValidatedNotBlankTalkPickFields;
@@ -44,6 +45,7 @@ public class TalkPickDto {
                     .member(member)
                     .title(baseFields.getTitle())
                     .content(baseFields.getContent())
+                    .summaryStatus(SummaryStatus.PENDING)
                     .optionA(baseFields.getOptionA())
                     .optionB(baseFields.getOptionB())
                     .sourceUrl(baseFields.getSourceUrl())

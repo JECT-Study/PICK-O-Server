@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -39,6 +40,8 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TalkPick extends BaseTimeEntity {
 
+    private static final int MIN_CONTENT_LENGTH_FOR_SUMMARY = 500;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,6 +56,9 @@ public class TalkPick extends BaseTimeEntity {
 
     @Embedded
     private Summary summary;
+
+    @NotNull
+    private SummaryStatus summaryStatus;
 
     @NotBlank
     @Size(max = 2000)
@@ -143,5 +149,13 @@ public class TalkPick extends BaseTimeEntity {
             this.notificationHistory = new NotificationHistory();
         }
         return this.notificationHistory;
+    }
+
+    public boolean hasShortContent() {
+        return content.length() < MIN_CONTENT_LENGTH_FOR_SUMMARY;
+    }
+
+    public void updateSummaryStatus(SummaryStatus summaryStatus) {
+        this.summaryStatus = summaryStatus;
     }
 }
