@@ -40,7 +40,7 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TalkPick extends BaseTimeEntity {
 
-    private static final int MIN_CONTENT_LENGTH_FOR_SUMMARY = 500;
+    private static final int MIN_CONTENT_LENGTH_FOR_SUMMARY = 200;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
