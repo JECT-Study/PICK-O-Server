@@ -45,10 +45,10 @@ public class TalkPickDto {
                     .member(member)
                     .title(baseFields.getTitle())
                     .content(baseFields.getContent())
-                    .summaryStatus(SummaryStatus.PENDING)
                     .optionA(baseFields.getOptionA())
                     .optionB(baseFields.getOptionB())
                     .sourceUrl(baseFields.getSourceUrl())
+                    .summaryStatus(SummaryStatus.PENDING)
                     .views(0L)
                     .bookmarks(0L)
                     .viewStatus(NORMAL)
@@ -84,6 +84,7 @@ public class TalkPickDto {
                     .optionA(baseFields.getOptionA())
                     .optionB(baseFields.getOptionB())
                     .sourceUrl(baseFields.getSourceUrl())
+                    .summaryStatus(SummaryStatus.PENDING)
                     .editedAt(LocalDateTime.now())
                     .build();
         }
