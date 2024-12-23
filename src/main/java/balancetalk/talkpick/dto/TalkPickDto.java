@@ -115,6 +115,8 @@ public class TalkPickDto {
 
         private SummaryResponse summary;
 
+        private SummaryStatus summaryStatus;
+
         @Schema(description = "톡픽 작성 시 첨부한 이미지 URL 목록",
                 example = "["
                         + "\"https://picko-image.amazonaws.com/temp-talk-pick/ad80-a94e083301d2_czz.png\",\n"
@@ -167,6 +169,7 @@ public class TalkPickDto {
                             .sourceUrl(entity.getSourceUrl())
                             .build())
                     .summary(new SummaryResponse(entity.getSummary()))
+                    .summaryStatus(entity.getSummaryStatus())
                     .imgUrls(imgUrls)
                     .fileIds(fileIds)
                     .votesCountOfOptionA(entity.votesCountOf(A))
