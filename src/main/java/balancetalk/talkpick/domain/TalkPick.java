@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -157,5 +158,12 @@ public class TalkPick extends BaseTimeEntity {
 
     public void updateSummaryStatus(SummaryStatus summaryStatus) {
         this.summaryStatus = summaryStatus;
+    }
+
+    public TodayTalkPick toTodayTalkPick() {
+        return TodayTalkPick.builder()
+                .pickDate(LocalDate.now())
+                .talkPick(this)
+                .build();
     }
 }

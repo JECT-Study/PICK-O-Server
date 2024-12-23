@@ -45,6 +45,7 @@ public class CommentDto {
                     .isBest(false)
                     .viewStatus(ViewStatus.NORMAL)
                     .parent(parent)
+                    .editedAt(LocalDateTime.now())
                     .isEdited(false)
                     .build();
         }
