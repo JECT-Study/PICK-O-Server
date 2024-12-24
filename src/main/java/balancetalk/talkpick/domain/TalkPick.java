@@ -1,5 +1,7 @@
 package balancetalk.talkpick.domain;
 
+import static balancetalk.talkpick.domain.SummaryStatus.PENDING;
+
 import balancetalk.comment.domain.Comment;
 import balancetalk.global.common.BaseTimeEntity;
 import balancetalk.global.notification.domain.NotificationHistory;
@@ -20,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
@@ -40,6 +43,8 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TalkPick extends BaseTimeEntity {
 
+    private static final int MIN_CONTENT_LENGTH_FOR_SUMMARY = 200;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,6 +59,11 @@ public class TalkPick extends BaseTimeEntity {
 
     @Embedded
     private Summary summary;
+
+    @Enumerated(value = EnumType.STRING)
+    @NotNull
+    @Builder.Default
+    private SummaryStatus summaryStatus = PENDING;
 
     @NotBlank
     @Size(max = 2000)
@@ -73,17 +83,20 @@ public class TalkPick extends BaseTimeEntity {
 
     @PositiveOrZero
     @ColumnDefault("0")
-    private Long views;
+    @Builder.Default
+    private Long views = 0L;
 
     @PositiveOrZero
     @ColumnDefault("0")
-    private Long bookmarks;
+    @Builder.Default
+    private Long bookmarks = 0L;
 
     private LocalDateTime editedAt;
 
     private boolean isEdited;
 
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private ViewStatus viewStatus = ViewStatus.NORMAL;
 
     @OneToMany(mappedBy = "talkPick", cascade = CascadeType.REMOVE)
@@ -144,6 +157,14 @@ public class TalkPick extends BaseTimeEntity {
             this.notificationHistory = new NotificationHistory();
         }
         return this.notificationHistory;
+    }
+
+    public boolean hasShortContent() {
+        return content.length() < MIN_CONTENT_LENGTH_FOR_SUMMARY;
+    }
+
+    public void updateSummaryStatus(SummaryStatus summaryStatus) {
+        this.summaryStatus = summaryStatus;
     }
 
     public TodayTalkPick toTodayTalkPick() {
