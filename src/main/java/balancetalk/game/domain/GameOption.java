@@ -3,6 +3,7 @@ package balancetalk.game.domain;
 import balancetalk.global.common.BaseTimeEntity;
 import balancetalk.vote.domain.GameVote;
 import balancetalk.vote.domain.VoteOption;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -58,7 +59,7 @@ public class GameOption extends BaseTimeEntity {
     @JoinColumn(name = "game_id")
     private Game game;
 
-    @OneToMany(mappedBy = "gameOption")
+    @OneToMany(mappedBy = "gameOption", cascade = CascadeType.REMOVE)
     private List<GameVote> gameVotes = new ArrayList<>();
 
     public void addGame(Game game) {
