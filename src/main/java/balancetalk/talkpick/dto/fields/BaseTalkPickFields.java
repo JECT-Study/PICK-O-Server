@@ -1,5 +1,6 @@
 package balancetalk.talkpick.dto.fields;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class BaseTalkPickFields {
     private String optionB;
 
     @Schema(description = "출처 URL", example = "https://github.com/CHZZK-Study/Balance-Talk-Backend/issues/506")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String sourceUrl;
 
     public static BaseTalkPickFields from(String title, String content,
@@ -39,6 +41,16 @@ public class BaseTalkPickFields {
                 .optionA(optionA)
                 .optionB(optionB)
                 .sourceUrl(sourceUrl)
+                .build();
+    }
+
+    public static BaseTalkPickFields from(String title, String content,
+                                          String optionA, String optionB) {
+        return BaseTalkPickFields.builder()
+                .title(title)
+                .content(content)
+                .optionA(optionA)
+                .optionB(optionB)
                 .build();
     }
 }

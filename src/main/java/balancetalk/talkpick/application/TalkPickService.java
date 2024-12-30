@@ -13,6 +13,7 @@ import balancetalk.member.dto.ApiMember;
 import balancetalk.member.dto.GuestOrApiMember;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.domain.TalkPickFileHandler;
+import balancetalk.talkpick.domain.TalkPickSummarizer;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.vote.domain.TalkPickVote;
 import java.util.List;
@@ -30,15 +31,20 @@ public class TalkPickService {
     private final MemberRepository memberRepository;
     private final TalkPickRepository talkPickRepository;
     private final TalkPickFileHandler talkPickFileHandler;
+    private final TalkPickSummarizer talkPickSummarizer;
 
     @Transactional
     public Long createTalkPick(CreateTalkPickRequest request, ApiMember apiMember) {
         Member member = apiMember.toMember(memberRepository);
         TalkPick savedTalkPick = talkPickRepository.save(request.toEntity(member));
         Long savedTalkPickId = savedTalkPick.getId();
+
         if (request.containsFileIds()) {
             talkPickFileHandler.handleFilesOnTalkPickCreate(request.getFileIds(), savedTalkPickId);
         }
+
+        talkPickSummarizer.summary(savedTalkPick);
+
         return savedTalkPickId;
     }
 
@@ -81,6 +87,7 @@ public class TalkPickService {
         talkPick.update(request.toEntity(member));
         talkPickFileHandler
                 .handleFilesOnTalkPickUpdate(request.getNewFileIds(), request.getDeleteFileIds(), talkPickId);
+        talkPickSummarizer.summary(talkPick);
     }
 
     @Transactional

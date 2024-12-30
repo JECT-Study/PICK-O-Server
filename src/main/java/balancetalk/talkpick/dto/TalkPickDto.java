@@ -7,6 +7,7 @@ import static balancetalk.vote.domain.VoteOption.B;
 import balancetalk.bookmark.domain.TalkPickBookmark;
 import balancetalk.comment.domain.Comment;
 import balancetalk.member.domain.Member;
+import balancetalk.talkpick.domain.SummaryStatus;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.dto.fields.BaseTalkPickFields;
 import balancetalk.talkpick.dto.fields.ValidatedNotBlankTalkPickFields;
@@ -47,6 +48,7 @@ public class TalkPickDto {
                     .optionA(baseFields.getOptionA())
                     .optionB(baseFields.getOptionB())
                     .sourceUrl(baseFields.getSourceUrl())
+                    .summaryStatus(SummaryStatus.PENDING)
                     .views(0L)
                     .bookmarks(0L)
                     .viewStatus(NORMAL)
@@ -82,6 +84,7 @@ public class TalkPickDto {
                     .optionA(baseFields.getOptionA())
                     .optionB(baseFields.getOptionB())
                     .sourceUrl(baseFields.getSourceUrl())
+                    .summaryStatus(SummaryStatus.PENDING)
                     .editedAt(LocalDateTime.now())
                     .build();
         }
@@ -111,6 +114,8 @@ public class TalkPickDto {
         private BaseTalkPickFields baseFields;
 
         private SummaryResponse summary;
+
+        private SummaryStatus summaryStatus;
 
         @Schema(description = "톡픽 작성 시 첨부한 이미지 URL 목록",
                 example = "["
@@ -164,6 +169,7 @@ public class TalkPickDto {
                             .sourceUrl(entity.getSourceUrl())
                             .build())
                     .summary(new SummaryResponse(entity.getSummary()))
+                    .summaryStatus(entity.getSummaryStatus())
                     .imgUrls(imgUrls)
                     .fileIds(fileIds)
                     .votesCountOfOptionA(entity.votesCountOf(A))
