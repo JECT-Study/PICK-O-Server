@@ -59,11 +59,9 @@ public class JwtTokenProvider {
         validateAuthentication(authentication);
         Claims claims = Jwts.claims();
         claims.put(MEMBER_ID, memberId);
-        claims.setSubject(authentication.getName());
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + refreshExpirationTime);
 
-        // redis에 refresh token 저장
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -75,7 +73,7 @@ public class JwtTokenProvider {
     public static Cookie createCookie(String refreshToken) {
         String cookieName = "refreshToken";
         Cookie cookie = new Cookie(cookieName, refreshToken);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setDomain("pick0.com");
         cookie.setPath("/");
@@ -86,7 +84,7 @@ public class JwtTokenProvider {
     public static Cookie createAccessCookie(String accessToken) {
         String cookieName = "accessToken";
         Cookie cookie = new Cookie(cookieName, accessToken);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setDomain("pick0.com");
         cookie.setPath("/");
