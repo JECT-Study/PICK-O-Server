@@ -64,6 +64,8 @@ public class CustomLogoutHandler extends GenericFilterBean {
 
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setMaxAge(0);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);
 
