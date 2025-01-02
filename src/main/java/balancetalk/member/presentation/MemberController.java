@@ -59,9 +59,9 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "로그아웃", description = "로그인 된 회원을 로그 아웃한다.")
+    @Operation(summary = "로그아웃", description = "로그인 된 회원을 로그아웃 처리한다.")
     public void logout() {
-        memberService.logout();
+
     }
 
     @GetMapping("/duplicate")
