@@ -146,6 +146,7 @@ public class MemberService {
         if (authentication == null) {
             throw new BalanceTalkException(AUTHENTICATION_REQUIRED);
         }
+
     }
 
     public void verifyNickname(String nickname) {
@@ -156,12 +157,14 @@ public class MemberService {
 
     public String reissueAccessToken(ApiMember apiMember) {
         Member member = apiMember.toMember(memberRepository);
+
         Cache cache = Optional.ofNullable(cacheManager.getCache(RefreshToken.getCacheName()))
                 .orElseThrow(() -> new BalanceTalkException(CACHE_NOT_FOUND));
         ValueWrapper valueWrapper = cache.get(member.getId());
         if (valueWrapper == null) {
             throw new BalanceTalkException(NOT_FOUND_CACHE_VALUE);
         }
+
         String refreshToken = (String) valueWrapper.get();
         return jwtTokenProvider.reissueAccessToken(refreshToken);
     }
