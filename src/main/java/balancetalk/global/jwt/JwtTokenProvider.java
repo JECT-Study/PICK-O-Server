@@ -77,18 +77,7 @@ public class JwtTokenProvider {
         cookie.setSecure(true);
         cookie.setDomain("pick0.com");
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24); // accessToken 유효
-        return cookie;
-    }
-
-    public static Cookie createAccessCookie(String accessToken) {
-        String cookieName = "accessToken";
-        Cookie cookie = new Cookie(cookieName, accessToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setDomain("pick0.com");
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setMaxAge(60 * 60 * 24 * 7);
         return cookie;
     }
 
@@ -98,15 +87,6 @@ public class JwtTokenProvider {
             return bearerToken.substring(7);
         }
         return null;
-    }
-
-    public String getRole(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody()
-                .get("role", String.class);
-    }
-
-    public String getPayload(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateToken(String token) {
