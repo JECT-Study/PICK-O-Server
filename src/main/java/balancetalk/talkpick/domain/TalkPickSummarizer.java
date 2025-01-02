@@ -1,5 +1,6 @@
 package balancetalk.talkpick.domain;
 
+import static balancetalk.global.exception.ErrorCode.NOT_FOUND_TALK_PICK;
 import static balancetalk.global.exception.ErrorCode.TALK_PICK_SUMMARY_FAILED;
 import static balancetalk.global.exception.ErrorCode.TALK_PICK_SUMMARY_SIZE_IS_OVER;
 import static balancetalk.talkpick.domain.SummaryStatus.FAIL;
@@ -7,6 +8,7 @@ import static balancetalk.talkpick.domain.SummaryStatus.NOT_REQUIRED;
 import static balancetalk.talkpick.domain.SummaryStatus.SUCCESS;
 
 import balancetalk.global.exception.BalanceTalkException;
+import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.talkpick.dto.fields.BaseTalkPickFields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,11 +53,15 @@ public class TalkPickSummarizer {
             """;
 
     private final ChatClient chatClient;
+    private final TalkPickRepository talkPickRepository;
 
     @Async
     @Retryable(backoff = @Backoff(delay = 1000), maxAttempts = 3)
     @Transactional
-    public void summary(TalkPick talkPick) {
+    public void summary(Long talkPickId) {
+        TalkPick talkPick = talkPickRepository.findById(talkPickId)
+                .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
+
         // 본문 글자수가 너무 짧으면 요약 제공 안함
         if (talkPick.hasShortContent()) {
             talkPick.updateSummaryStatus(NOT_REQUIRED);
