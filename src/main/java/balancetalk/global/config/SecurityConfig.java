@@ -1,11 +1,11 @@
 package balancetalk.global.config;
 
 import balancetalk.global.jwt.CustomLogoutHandler;
+import balancetalk.global.jwt.CustomSuccessHandler;
 import balancetalk.global.jwt.JwtAccessDeniedHandler;
 import balancetalk.global.jwt.JwtAuthenticationEntryPoint;
 import balancetalk.global.jwt.JwtAuthenticationFilter;
 import balancetalk.global.jwt.JwtTokenProvider;
-import balancetalk.global.jwt.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;

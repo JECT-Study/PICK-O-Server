@@ -25,11 +25,13 @@ public class CustomLogoutHandler extends GenericFilterBean {
     private final CacheManager cacheManager;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request,
+                         ServletResponse response, FilterChain chain) throws IOException, ServletException {
         doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private void doFilter(HttpServletRequest request,
+                          HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
         String requestUri = request.getRequestURI();
         if (!requestUri.equals("/members/logout")) {
