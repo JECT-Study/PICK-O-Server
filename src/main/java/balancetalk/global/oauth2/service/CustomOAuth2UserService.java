@@ -73,6 +73,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .email(findMember.getEmail())
                     .role(findMember.getRole())
                     .build();
+            if (findMember.getSignupType() == STANDARD) { // 일반 회원일 때 소셜 로그인 클릭 시, 홈으로 리다이렉트
+                return new CustomOAuth2User(oauth2Dto, firstRegisterUrl);
+            }
             return new CustomOAuth2User(oauth2Dto, alreadyRegisteredUrl);
         }
     }
