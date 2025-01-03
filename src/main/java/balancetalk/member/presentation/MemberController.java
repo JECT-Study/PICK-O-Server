@@ -6,6 +6,7 @@ import balancetalk.member.dto.ApiMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -73,8 +74,8 @@ public class MemberController {
 
     @GetMapping("/reissue")
     @Operation(summary = "액세스 토큰 재발급", description = "만료된 액세스 토큰을 재발급 받는다.")
-    public String reissueAccessToken(@Parameter(hidden = true) @AuthPrincipal ApiMember apiMember) {
-        return memberService.reissueAccessToken(apiMember);
+    public String reissueAccessToken(HttpServletRequest request) {
+        return memberService.reissueAccessToken(request);
     }
 
     @PutMapping
