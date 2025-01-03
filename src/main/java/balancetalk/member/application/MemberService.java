@@ -3,8 +3,9 @@ package balancetalk.member.application;
 import static balancetalk.global.caffeine.CacheType.RefreshToken;
 import static balancetalk.global.exception.ErrorCode.ALREADY_REGISTERED_EMAIL;
 import static balancetalk.global.exception.ErrorCode.ALREADY_REGISTERED_NICKNAME;
-import static balancetalk.global.exception.ErrorCode.AUTHENTICATION_REQUIRED;
 import static balancetalk.global.exception.ErrorCode.CACHE_NOT_FOUND;
+import static balancetalk.global.exception.ErrorCode.CACHE_VALUE_COOKIE_MISMATCH;
+import static balancetalk.global.exception.ErrorCode.CANNOT_LOGOUT;
 import static balancetalk.global.exception.ErrorCode.FORBIDDEN_MEMBER_DELETE;
 import static balancetalk.global.exception.ErrorCode.MISMATCHED_EMAIL_OR_PASSWORD;
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_CACHE_VALUE;
@@ -27,6 +28,7 @@ import balancetalk.member.dto.MemberDto.LoginRequest;
 import balancetalk.member.dto.MemberDto.MemberResponse;
 import balancetalk.member.dto.MemberDto.MemberUpdateRequest;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +38,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,14 +88,16 @@ public class MemberService {
         String accessToken = jwtTokenProvider.createAccessToken(authentication, member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(authentication, member.getId());
 
+
+        Cookie cookie = JwtTokenProvider.createCookie(refreshToken);
+        response.addCookie(cookie);
+
         Optional.ofNullable(cacheManager.getCache(RefreshToken.getCacheName()))
                 .ifPresentOrElse(
                         cache -> cache.put(member.getId(), refreshToken),
                         () -> {
                             throw new BalanceTalkException(CACHE_NOT_FOUND);
                         });
-        Cookie cookie = JwtTokenProvider.createCookie(refreshToken);
-        response.addCookie(cookie);
         return accessToken;
     }
 
@@ -141,29 +144,40 @@ public class MemberService {
         memberRepository.deleteByEmail(member.getEmail());
     }
 
-    public void logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new BalanceTalkException(AUTHENTICATION_REQUIRED);
-        }
-    }
-
     public void verifyNickname(String nickname) {
         if (memberRepository.existsByNickname(nickname)) {
             throw new BalanceTalkException(ALREADY_REGISTERED_NICKNAME);
         }
     }
 
-    public String reissueAccessToken(ApiMember apiMember) {
-        Member member = apiMember.toMember(memberRepository);
+    public String reissueAccessToken(HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new BalanceTalkException(CANNOT_LOGOUT);
+        }
+
+        String refreshToken = null;
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("refreshToken")) {
+                refreshToken = cookie.getValue();
+                jwtTokenProvider.validateToken(refreshToken);
+            }
+        }
+
         Cache cache = Optional.ofNullable(cacheManager.getCache(RefreshToken.getCacheName()))
                 .orElseThrow(() -> new BalanceTalkException(CACHE_NOT_FOUND));
-        ValueWrapper valueWrapper = cache.get(member.getId());
+        Long memberId = jwtTokenProvider.getMemberId(refreshToken);
+        ValueWrapper valueWrapper = cache.get(memberId);
         if (valueWrapper == null) {
             throw new BalanceTalkException(NOT_FOUND_CACHE_VALUE);
         }
-        String refreshToken = (String) valueWrapper.get();
-        return jwtTokenProvider.reissueAccessToken(refreshToken);
+
+        String cacheValue = (String) valueWrapper.get();
+        if (cacheValue != null && !cacheValue.equals(refreshToken)) {
+            throw new BalanceTalkException(CACHE_VALUE_COOKIE_MISMATCH);
+        }
+        return jwtTokenProvider.reissueAccessToken(cacheValue);
     }
 
     public void updateMemberInformation(MemberUpdateRequest memberUpdateRequest, ApiMember apiMember) {
