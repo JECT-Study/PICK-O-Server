@@ -40,10 +40,10 @@ public class MemberController {
         return memberService.login(loginRequest, response);
     }
 
-    @GetMapping("/{memberId}")
-    @Operation(summary = "단일 회원 조회", description = "memberId와 일치하는 회원 정보를 조회한다.")
-    public MemberResponse findMemberInfo(@PathVariable("memberId") Long memberId) {
-        return memberService.findById(memberId);
+    @GetMapping("/info")
+    @Operation(summary = "단일 회원 조회", description = "회원 정보를 조회한다.")
+    public MemberResponse findMemberInfo(@Parameter(hidden = true) @AuthPrincipal ApiMember apiMember) {
+        return memberService.findMemberInfo(apiMember);
     }
 
     @GetMapping
@@ -73,7 +73,7 @@ public class MemberController {
     }
 
     @GetMapping("/reissue")
-    @Operation(summary = "액세스 토큰 재발급", description = "만료된 액세스 토큰을 재발급 받는다.")
+    @Operation(summary = "액세스 토큰 재발급", description = "액세스 토큰을 재발급 받는다.")
     public String reissueAccessToken(HttpServletRequest request) {
         return memberService.reissueAccessToken(request);
     }
