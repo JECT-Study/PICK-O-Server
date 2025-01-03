@@ -174,7 +174,7 @@ public class MemberService {
         }
 
         String cacheValue = (String) valueWrapper.get();
-        if (!cacheValue.equals(refreshToken)) {
+        if (cacheValue != null && !cacheValue.equals(refreshToken)) {
             throw new BalanceTalkException(CACHE_VALUE_COOKIE_MISMATCH);
         }
         return jwtTokenProvider.reissueAccessToken(cacheValue);
