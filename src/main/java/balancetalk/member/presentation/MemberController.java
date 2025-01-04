@@ -78,11 +78,10 @@ public class MemberController {
         return memberService.reissueAccessToken(request);
     }
 
-    @PutMapping
-    @Operation(summary = "회원 정보 수정", description = "회원의 프로필 이미지 또는 닉네임을 수정한다.")
-    public void updateMemberInfo(@RequestBody @Valid MemberUpdateRequest memberUpdateRequest,
-                                 @Parameter(hidden = true) @AuthPrincipal ApiMember apiMember) {
-        memberService.updateMemberInformation(memberUpdateRequest, apiMember);
+    @GetMapping("/{memberId}")
+    @Operation(summary = "단일 회원 조회", description = "memberId와 일치하는 회원 정보를 조회한다.")
+    public MemberResponse findMemberInfo(@PathVariable("memberId") Long memberId) {
+        return memberService.findById(memberId);
     }
 
     @PostMapping("/verify-password")
