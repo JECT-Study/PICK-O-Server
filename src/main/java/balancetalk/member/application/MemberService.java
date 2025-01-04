@@ -10,7 +10,6 @@ import static balancetalk.global.exception.ErrorCode.FORBIDDEN_MEMBER_DELETE;
 import static balancetalk.global.exception.ErrorCode.MISMATCHED_EMAIL_OR_PASSWORD;
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_CACHE_VALUE;
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_FILE;
-import static balancetalk.global.exception.ErrorCode.NOT_FOUND_MEMBER;
 import static balancetalk.global.exception.ErrorCode.PASSWORD_MISMATCH;
 import static balancetalk.global.exception.ErrorCode.SAME_NICKNAME;
 
@@ -102,10 +101,8 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberResponse findById(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_MEMBER));
-
+    public MemberResponse findMemberInfo(ApiMember apiMember) {
+        Member member = apiMember.toMember(memberRepository);
         if (member.getProfileImgId() == null) {
             return MemberResponse.fromEntity(member, null);
         }
@@ -113,6 +110,7 @@ public class MemberService {
         String imgUrl = fileRepository.findById(member.getProfileImgId())
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_FILE))
                 .getImgUrl();
+
         return MemberResponse.fromEntity(member, imgUrl);
     }
 
