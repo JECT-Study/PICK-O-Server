@@ -106,6 +106,12 @@ dependencies {
 
 	// 오류 해결을 위한 임시 추가
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+
+	// actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// 프로메테우스
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
