@@ -4,7 +4,6 @@ import balancetalk.talkpick.domain.TalkPick;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
 
 public interface TalkPickRepository extends JpaRepository<TalkPick, Long>, TalkPickRepositoryCustom {
 
