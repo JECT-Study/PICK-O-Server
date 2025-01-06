@@ -2,12 +2,14 @@ package balancetalk.talkpick.application;
 
 import static balancetalk.talkpick.domain.SummaryStatus.FAIL;
 
+import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.domain.TalkPickSummarizer;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +17,7 @@ public class TalkPickScheduleService {
 
     private final TalkPickRepository talkPickRepository;
     private final TalkPickSummarizer talkPickSummarizer;
+    private final TodayTalkPickService todayTalkPickService;
 
     @Scheduled(cron = "0 00 00 * * ?")
     public void retryFailedSummaries() {
@@ -22,5 +25,10 @@ public class TalkPickScheduleService {
         for (Long summaryFailedTalkPickId : summaryFailedTalkPickIds) {
             talkPickSummarizer.summarizeTalkPick(summaryFailedTalkPickId);
         }
+    }
+
+    @Scheduled(cron = "0 00 00 * * ?")
+    public void updateTodayTalkPick() {
+        todayTalkPickService.updateTodayTalkPick();
     }
 }
