@@ -5,6 +5,7 @@ import static balancetalk.talkpick.domain.QTalkPick.talkPick;
 import static balancetalk.talkpick.dto.TalkPickDto.TalkPickResponse;
 import static balancetalk.vote.domain.QTalkPickVote.talkPickVote;
 
+import balancetalk.talkpick.domain.SummaryStatus;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.dto.QTalkPickDto_TalkPickResponse;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -62,6 +63,14 @@ public class TalkPickRepositoryImpl implements TalkPickRepositoryCustom {
                 .from(talkPick)
                 .orderBy(talkPick.views.desc(), talkPick.createdAt.desc())
                 .limit(3)
+                .fetch();
+    }
+
+    @Override
+    public List<Long> findIdsBySummaryStatus(SummaryStatus summaryStatus) {
+        return queryFactory.select(talkPick.id)
+                .from(talkPick)
+                .where(talkPick.summaryStatus.eq(summaryStatus))
                 .fetch();
     }
 }
