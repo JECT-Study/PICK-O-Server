@@ -6,6 +6,7 @@ import balancetalk.member.dto.ApiMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -39,10 +40,10 @@ public class MemberController {
         return memberService.login(loginRequest, response);
     }
 
-    @GetMapping("/{memberId}")
-    @Operation(summary = "단일 회원 조회", description = "memberId와 일치하는 회원 정보를 조회한다.")
-    public MemberResponse findMemberInfo(@PathVariable("memberId") Long memberId) {
-        return memberService.findById(memberId);
+    @GetMapping("/info")
+    @Operation(summary = "단일 회원 조회", description = "회원 정보를 조회한다.")
+    public MemberResponse findMemberInfo(@Parameter(hidden = true) @AuthPrincipal ApiMember apiMember) {
+        return memberService.findMemberInfo(apiMember);
     }
 
     @GetMapping
@@ -59,9 +60,9 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "로그아웃", description = "로그인 된 회원을 로그 아웃한다.")
-    public void logout() {
-        memberService.logout();
+    @Operation(summary = "로그아웃", description = "로그인 된 회원을 로그아웃 처리한다.")
+    public String logout() {
+        return "로그아웃 처리되었습니다.";
     }
 
     @GetMapping("/duplicate")
@@ -72,9 +73,9 @@ public class MemberController {
     }
 
     @GetMapping("/reissue")
-    @Operation(summary = "액세스 토큰 재발급", description = "만료된 액세스 토큰을 재발급 받는다.")
-    public String reissueAccessToken(@Parameter(hidden = true) @AuthPrincipal ApiMember apiMember) {
-        return memberService.reissueAccessToken(apiMember);
+    @Operation(summary = "액세스 토큰 재발급", description = "액세스 토큰을 재발급 받는다.")
+    public String reissueAccessToken(HttpServletRequest request) {
+        return memberService.reissueAccessToken(request);
     }
 
     @PutMapping

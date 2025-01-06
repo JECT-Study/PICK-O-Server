@@ -1,11 +1,13 @@
 package balancetalk.global.config;
 
+import balancetalk.global.jwt.CustomLogoutHandler;
+import balancetalk.global.jwt.CustomSuccessHandler;
 import balancetalk.global.jwt.JwtAccessDeniedHandler;
 import balancetalk.global.jwt.JwtAuthenticationEntryPoint;
 import balancetalk.global.jwt.JwtAuthenticationFilter;
 import balancetalk.global.jwt.JwtTokenProvider;
-import balancetalk.global.oauth2.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,6 +36,7 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final OAuth2UserService oAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
+    private final CacheManager cacheManager;
 
     @Bean
     public static BCryptPasswordEncoder passwordEncoder() {
@@ -61,11 +65,16 @@ public class SecurityConfig {
                 )
 
                 // jwtFilter 먼저 적용
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
+
+                .addFilterBefore(new CustomLogoutHandler(jwtTokenProvider, cacheManager),
+                        LogoutFilter.class)
 
                 // oauth2
                 .oauth2Login((oauth2) ->
-                        oauth2.userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(oAuth2UserService))
+                        oauth2.userInfoEndpoint(
+                                        userInfoEndpointConfig -> userInfoEndpointConfig.userService(oAuth2UserService))
                                 .successHandler(customSuccessHandler) // customSuccessHandler 등록 -> 로그인이 성공하면 쿠키에 담김
                 );
     return http.build();
@@ -97,7 +106,7 @@ public class SecurityConfig {
         configuration.addAllowedHeader("Referer");
         configuration.addAllowedHeader("User-Agent");
         configuration.addAllowedHeader("Sec-Fetch-Mode");
-        configuration.addAllowedHeader("Sec-Fetch-Site");;
+        configuration.addAllowedHeader("Sec-Fetch-Site");
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(MAX_AGE_SEC);
