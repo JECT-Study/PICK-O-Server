@@ -18,9 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,11 +53,11 @@ public class TalkPickSummarizer {
     private final TalkPickRepository talkPickRepository;
 
     @Async
-    @Retryable(backoff = @Backoff(delay = 1000), maxAttempts = 3)
     @Transactional
-    public void summary(Long talkPickId) {
+    public void summarizeTalkPick(Long talkPickId) {
         TalkPick talkPick = talkPickRepository.findById(talkPickId)
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
+
 
         // 본문 글자수가 너무 짧으면 요약 제공 안함
         if (talkPick.hasShortContent()) {
@@ -69,7 +66,17 @@ public class TalkPickSummarizer {
         }
 
         // 요약 수행
-        Summary summary = getSummary(talkPick);
+        try {
+            summarize(talkPick);
+        } catch (Exception e) {
+            log.error("Fail to summary TalkPick ID = {}", talkPickId);
+            log.error("exception message = {} {}", e.getMessage(), e.getStackTrace());
+            talkPick.updateSummaryStatus(FAIL);
+        }
+    }
+
+    private void summarize(TalkPick talkPick) {
+        Summary summary = callPromptForSummary(talkPick);
         if (summary == null) {
             throw new BalanceTalkException(TALK_PICK_SUMMARY_FAILED);
         }
@@ -84,7 +91,7 @@ public class TalkPickSummarizer {
         talkPick.updateSummaryStatus(SUCCESS);
     }
 
-    private Summary getSummary(TalkPick talkPick) {
+    private Summary callPromptForSummary(TalkPick talkPick) {
         return chatClient.prompt()
                 .advisors(new SimpleLoggerAdvisor())
                 .system(SYSTEM_MESSAGE)
@@ -106,12 +113,5 @@ public class TalkPickSummarizer {
                 talkPick.getContent(),
                 talkPick.getOptionA(),
                 talkPick.getOptionB());
-    }
-
-    @Recover
-    public void recoverSummary(Throwable ex, TalkPick talkPick) {
-        log.error("Fail to summary ID={} TalkPick", talkPick.getId());
-        log.error("exception message = {} {}", ex.getMessage(), ex.getStackTrace());
-        talkPick.updateSummaryStatus(FAIL);
     }
 }
