@@ -105,7 +105,8 @@ public class CommentService {
         }
 
         VoteOption option = member.getVoteOnTalkPick(talkPick)
-                .isPresent() ? member.getVoteOnTalkPick(talkPick).get().getVoteOption() : null;
+                .map(TalkPickVote::getVoteOption)
+                .orElse(null);
 
         Comment commentReply = createCommentRequest.toEntity(member, talkPick, parentComment, option);
         commentRepository.save(commentReply);
