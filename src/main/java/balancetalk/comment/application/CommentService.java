@@ -17,6 +17,7 @@ import balancetalk.member.dto.ApiMember;
 import balancetalk.member.dto.GuestOrApiMember;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
+import balancetalk.vote.domain.TalkPickVote;
 import balancetalk.vote.domain.VoteOption;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +76,8 @@ public class CommentService {
         }
 
         VoteOption option = member.getVoteOnTalkPick(talkPick)
-                .isPresent() ? member.getVoteOnTalkPick(talkPick).get().getVoteOption() : null;
+                .map(TalkPickVote::getVoteOption)
+                .orElse(null);
 
         Comment comment = createCommentRequest.toEntity(member, talkPick, option);
         commentRepository.save(comment);
@@ -117,12 +119,12 @@ public class CommentService {
     public Page<LatestCommentResponse> findAllComments(Long talkPickId, Pageable pageable,
                                                        GuestOrApiMember guestOrApiMember) {
         validateTalkPickId(talkPickId);
-        TalkPick talkPick = talkPickRepository.findById(talkPickId)
+        talkPickRepository.findById(talkPickId)
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
 
         Page<Comment> comments = commentRepository.findAllByTalkPickIdAndParentIsNull(talkPickId, pageable);
 
-        return convertToLatestCommentPagesResponse(comments, talkPick, guestOrApiMember);
+        return convertToLatestCommentPagesResponse(comments, guestOrApiMember);
     }
 
     @Transactional(readOnly = true)
@@ -144,13 +146,14 @@ public class CommentService {
     }
 
     // Page<Comment> 처리
-    private Page<LatestCommentResponse> convertToLatestCommentPagesResponse(Page<Comment> comments, TalkPick talkPick,
+    private Page<LatestCommentResponse> convertToLatestCommentPagesResponse(Page<Comment> comments,
                                                                             GuestOrApiMember guestOrApiMember) {
         return comments.map(comment -> mapToLatestCommentResponse(comment, guestOrApiMember));
     }
 
     // List<Comment> 처리
-    private List<LatestCommentResponse> convertToLatestCommentResponse(List<Comment> comments, GuestOrApiMember guestOrApiMember) {
+    private List<LatestCommentResponse> convertToLatestCommentResponse(List<Comment> comments,
+                                                                       GuestOrApiMember guestOrApiMember) {
         return comments.stream()
                 .map(comment -> mapToLatestCommentResponse(comment, guestOrApiMember))
                 .toList();
