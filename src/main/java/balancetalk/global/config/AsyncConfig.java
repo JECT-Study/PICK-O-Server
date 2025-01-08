@@ -13,7 +13,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
-    @Value("${async.executor.corePoolSize}")
+    @Value("${async.executor.core-pool-size}")
     private int corePoolSize;
 
     @Override
