@@ -74,7 +74,10 @@ public class CommentService {
             throw new BalanceTalkException(NOT_FOUND_VOTE);
         }
 
-        Comment comment = createCommentRequest.toEntity(member, talkPick);
+        VoteOption option = member.getVoteOnTalkPick(talkPick)
+                .isPresent() ? member.getVoteOnTalkPick(talkPick).get().getVoteOption() : null;
+
+        Comment comment = createCommentRequest.toEntity(member, talkPick, option);
         commentRepository.save(comment);
         sendCommentNotification(talkPick);
     }
@@ -99,7 +102,10 @@ public class CommentService {
             throw new BalanceTalkException(NOT_FOUND_VOTE);
         }
 
-        Comment commentReply = createCommentRequest.toEntity(member, talkPick, parentComment);
+        VoteOption option = member.getVoteOnTalkPick(talkPick)
+                .isPresent() ? member.getVoteOnTalkPick(talkPick).get().getVoteOption() : null;
+
+        Comment commentReply = createCommentRequest.toEntity(member, talkPick, parentComment, option);
         commentRepository.save(commentReply);
 
         // 알림 전송
@@ -128,37 +134,34 @@ public class CommentService {
         validateTalkPickId(talkPickId);
 
         long memberId = guestOrApiMember.getMemberId();
-        TalkPick talkPick = talkPickRepository.findById(talkPickId)
+        talkPickRepository.findById(talkPickId)
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
 
         // 해당 부모 댓글의 답글 조회
         List<Comment> replies = commentRepository.findAllRepliesByParentIdOrderByMemberAndCreatedAt(parentId, memberId);
 
-        return convertToLatestCommentResponse(replies, talkPick, guestOrApiMember);
+        return convertToLatestCommentResponse(replies, guestOrApiMember);
     }
 
     // Page<Comment> 처리
     private Page<LatestCommentResponse> convertToLatestCommentPagesResponse(Page<Comment> comments, TalkPick talkPick,
                                                                             GuestOrApiMember guestOrApiMember) {
-        return comments.map(comment -> mapToLatestCommentResponse(comment, talkPick, guestOrApiMember));
+        return comments.map(comment -> mapToLatestCommentResponse(comment, guestOrApiMember));
     }
 
     // List<Comment> 처리
-    private List<LatestCommentResponse> convertToLatestCommentResponse(List<Comment> comments, TalkPick talkPick,
-                                                                       GuestOrApiMember guestOrApiMember) {
+    private List<LatestCommentResponse> convertToLatestCommentResponse(List<Comment> comments, GuestOrApiMember guestOrApiMember) {
         return comments.stream()
-                .map(comment -> mapToLatestCommentResponse(comment, talkPick, guestOrApiMember))
+                .map(comment -> mapToLatestCommentResponse(comment, guestOrApiMember))
                 .toList();
     }
 
     // 공통 변환 로직
-    private LatestCommentResponse mapToLatestCommentResponse(Comment comment, TalkPick talkPick,
-                                                             GuestOrApiMember guestOrApiMember) {
+    private LatestCommentResponse mapToLatestCommentResponse(Comment comment, GuestOrApiMember guestOrApiMember) {
         int likesCount = likeRepository.countByResourceIdAndLikeType(comment.getId(), LikeType.COMMENT);
         boolean myLike = isCommentMyLiked(comment.getId(), guestOrApiMember);
         Member member = comment.getMember();
-        VoteOption option = member.getVoteOnTalkPick(talkPick)
-                .isPresent() ? member.getVoteOnTalkPick(talkPick).get().getVoteOption() : null;
+        VoteOption option = comment.getVoteOption();
 
         String imgUrl = (member.getProfileImgId() != null) ? fileRepository.findById(member.getProfileImgId())
                         .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_FILE))
