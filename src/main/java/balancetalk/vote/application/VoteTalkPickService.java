@@ -73,6 +73,11 @@ public class VoteTalkPickService {
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_VOTE));
 
         vote.updateVoteOption(request.getVoteOption());
+
+        talkPick.getComments().stream()
+                .filter(comment -> comment.getMember().equals(member))
+                        .forEach(comment -> comment.updateVoteOption(request.getVoteOption()));
+
         sendVoteTalkPickRatioNotification(talkPick);
     }
 
