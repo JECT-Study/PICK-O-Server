@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +28,8 @@ public class TodayTalkPickService {
     @Value("${pick-o.today-talk-pick-count}")
     private int todayTalkPickCount;
 
-    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    public void createTodayTalkPick() {
+    public void updateTodayTalkPick() {
         List<TalkPick> candidateTodayTalkPicks = getCandidateTodayTalkPicks();
         Collections.shuffle(candidateTodayTalkPicks);
         List<TodayTalkPick> todayTalkPicks = candidateTodayTalkPicks.subList(0, todayTalkPickCount)

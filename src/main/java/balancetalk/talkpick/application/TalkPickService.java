@@ -43,7 +43,7 @@ public class TalkPickService {
             talkPickFileHandler.handleFilesOnTalkPickCreate(request.getFileIds(), savedTalkPickId);
         }
 
-        talkPickSummarizer.summary(savedTalkPickId);
+        talkPickSummarizer.summarizeTalkPick(savedTalkPickId);
 
         return savedTalkPickId;
     }
@@ -87,7 +87,7 @@ public class TalkPickService {
         talkPick.update(request.toEntity(member));
         talkPickFileHandler
                 .handleFilesOnTalkPickUpdate(request.getNewFileIds(), request.getDeleteFileIds(), talkPickId);
-        talkPickSummarizer.summary(talkPickId);
+        talkPickSummarizer.summarizeTalkPick(talkPickId);
     }
 
     @Transactional
