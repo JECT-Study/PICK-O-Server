@@ -67,21 +67,26 @@ public class CommentService {
         Member member = apiMember.toMember(memberRepository);
         TalkPick talkPick = validateTalkPickId(talkPickId);
 
-        if (!member.hasVotedTalkPick(talkPick) && !talkPick.getMember().equals(member)) {
-            throw new BalanceTalkException(NOT_FOUND_VOTE);
-        }
-
         if (member.cannotWriteComment(talkPick)) {
             throw new BalanceTalkException(NOT_FOUND_VOTE);
         }
 
-        VoteOption option = member.getVoteOnTalkPick(talkPick)
-                .map(TalkPickVote::getVoteOption)
-                .orElse(null);
+        VoteOption option = getVoteOption(member, talkPick);
 
         Comment comment = createCommentRequest.toEntity(member, talkPick, option);
         commentRepository.save(comment);
         sendCommentNotification(talkPick);
+    }
+
+    private VoteOption getVoteOption(Member member, TalkPick talkPick) {
+
+        if (member.equals(talkPick.getMember())) { // 톡픽 작성자는 무조건 null -> 회색 프로필 처리(프론트)
+            return null;
+        }
+
+        return member.getVoteOnTalkPick(talkPick)
+                .map(TalkPickVote::getVoteOption)
+                .orElse(null);
     }
 
     @Transactional
