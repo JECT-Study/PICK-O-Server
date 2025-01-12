@@ -76,6 +76,7 @@ public class Comment extends BaseTimeEntity {
 
     private boolean isEdited;
 
+    @Enumerated(value = EnumType.STRING)
     private VoteOption voteOption;
 
     @Embedded
