@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,6 +23,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${urls.alreadyRegistered}")
+    private String alreadyRegisteredUrl;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
@@ -38,6 +42,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_MEMBER));
+        String redirectUrl = customUserDetails.getRedirectUrl();
+
+        if (redirectUrl.equals(alreadyRegisteredUrl)) { // 이미 가입한 회원인 경우에, 쿠키 생성과 토큰 생성을 하지 않고 리다이렉트 처리
+            response.sendRedirect(redirectUrl);
+            return;
+        }
+
         String refreshToken = jwtTokenProvider.createRefreshToken(authentication, member.getId());
 
         response.addCookie(JwtTokenProvider.createCookie(refreshToken));
@@ -49,7 +60,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                             throw new BalanceTalkException(CACHE_NOT_FOUND);
                         });
 
-        String redirectUrl = customUserDetails.getRedirectUrl();
         response.sendRedirect(redirectUrl);
     }
 }
