@@ -14,6 +14,9 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchGameResponse {
 
+    @Schema(description = "작성자 id", example = "1")
+    private Long writerId;
+
     @Schema(description = "밸런스 게임 ID", example = "1")
     private long id;
 
@@ -37,6 +40,7 @@ public class SearchGameResponse {
 
     public static SearchGameResponse from(Game game, String imgA, String imgB) {
         return SearchGameResponse.builder()
+                .writerId(game.getWriterId())
                 .gameSetId(game.getGameSet().getId())
                 .id(game.getId())
                 .title(game.getGameSet().getTitle())
