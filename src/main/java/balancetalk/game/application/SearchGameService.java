@@ -53,14 +53,6 @@ public class SearchGameService {
         }
     }
 
-    private void sort(List<Game> resultList, String sort) {
-        if (sort.equals("views")) {
-            sortByViews(resultList);
-        } else {
-            sortByCreatedAt(resultList);
-        }
-    }
-
     private String removeSpaces(String query) {
         return query.replaceAll("\\s+", ""); // 모든 공백 제거
     }
@@ -84,16 +76,5 @@ public class SearchGameService {
                 .filter(option -> option.getImgId() != null)
                 .map(GameOption::getImgId)
                 .toList();
-    }
-
-    private void sortByViews(List<Game> resultList) {
-        resultList.sort(Comparator
-                .comparingLong((Game game) -> game.getGameSet().getViews())
-                .thenComparing((Game game) -> game.getGameSet().getCreatedAt()).reversed());
-    }
-
-    private void sortByCreatedAt(List<Game> resultList) {
-        resultList.sort(Comparator
-                .comparing((Game game) -> game.getGameSet().getCreatedAt()).reversed());
     }
 }
