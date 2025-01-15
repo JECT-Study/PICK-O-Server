@@ -72,6 +72,9 @@ public class GameSetDto {
     @Schema(description = "밸런스 게임 세트 목록 조회 응답")
     public static class GameSetResponse {
 
+        @Schema(description = "작성자 id", example = "1")
+        private Long writerId;
+
         @Schema(description = "밸런스 게임 세트 id", example = "1")
         private Long id;
 
@@ -90,6 +93,7 @@ public class GameSetDto {
 
         public static GameSetResponse fromEntity(GameSet gameSet, Member member, List<String> images) {
             return GameSetResponse.builder()
+                    .writerId(gameSet.getWriterId())
                     .id(gameSet.getId())
                     .title(gameSet.getTitle())
                     .mainTag(gameSet.getMainTag().getName())
