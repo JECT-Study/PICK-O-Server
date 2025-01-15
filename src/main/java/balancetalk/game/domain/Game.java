@@ -49,6 +49,10 @@ public class Game extends BaseTimeEntity {
 
     private LocalDateTime editedAt;
 
+    public Long getWriterId() {
+        return gameSet.getWriterId();
+    }
+
     public long getVoteCount(VoteOption optionType) {
         GameOption option = gameOptions.stream()
                 .filter(gameOption -> gameOption.isTypeEqual(optionType))
