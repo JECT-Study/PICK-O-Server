@@ -151,7 +151,7 @@ public class GameService {
         fileHandler.relocateFile(newFile, oldGameOption.getId(), GAME_OPTION);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GameSetDetailResponse findBalanceGameSet(final Long gameSetId, final GuestOrApiMember guestOrApiMember) {
         GameSet gameSet = gameSetRepository.findById(gameSetId)
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME_SET));
