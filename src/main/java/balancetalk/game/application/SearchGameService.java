@@ -2,6 +2,7 @@ package balancetalk.game.application;
 
 import static balancetalk.global.exception.ErrorCode.BALANCE_GAME_SEARCH_BLANK;
 import static balancetalk.global.exception.ErrorCode.BALANCE_GAME_SEARCH_LENGTH;
+import static balancetalk.global.exception.ErrorCode.INVALID_BALANCE_GAME_SEARCH_SORT;
 
 import balancetalk.file.domain.File;
 import balancetalk.file.domain.FileType;
@@ -28,10 +29,14 @@ public class SearchGameService {
     private final FileRepository fileRepository;
 
     private static final int MINIMUM_SEARCH_LENGTH = 2;
+    private static final List<String> ALLOWED_SORTS = List.of("views", "createdAt");
+
 
     public Page<SearchGameResponse> search(String query, Pageable pageable, String sort) {
 
         validateQuery(query);
+        validateSort(sort);
+
         String queryWithoutSpaces = removeSpaces(query);
 
         Page<Game> pageResult = gameRepository.searchAll(query, queryWithoutSpaces, sort, pageable);
@@ -48,6 +53,12 @@ public class SearchGameService {
 
         if (query.replace(" ", "").length() < MINIMUM_SEARCH_LENGTH) {
             throw new BalanceTalkException(BALANCE_GAME_SEARCH_LENGTH);
+        }
+    }
+
+    private void validateSort(String sort) {
+        if (!ALLOWED_SORTS.contains(sort)) {
+            throw new BalanceTalkException(INVALID_BALANCE_GAME_SEARCH_SORT);
         }
     }
 
