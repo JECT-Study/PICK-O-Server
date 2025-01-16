@@ -17,7 +17,7 @@ public class TalkPickScheduleService {
     private final TalkPickSummarizer talkPickSummarizer;
     private final TodayTalkPickService todayTalkPickService;
 
-    @Scheduled(cron = "0 30 00 * * ?")
+//    @Scheduled(cron = "0 30 00 * * ?")
     public void retryFailedSummaries() {
         List<Long> summaryFailedTalkPickIds = talkPickRepository.findIdsBySummaryStatus(FAIL);
         for (Long summaryFailedTalkPickId : summaryFailedTalkPickIds) {

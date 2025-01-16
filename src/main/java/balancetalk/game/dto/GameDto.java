@@ -147,6 +147,9 @@ public class GameDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class GameMyPageResponse {
 
+        @Schema(description = "작성자 id", example = "1")
+        private Long writerId;
+
         @Schema(description = "밸런스 게임 세트 ID", example = "1")
         private long gameSetId;
 
@@ -180,6 +183,7 @@ public class GameDto {
 
         public static GameMyPageResponse from(GameSet gameSet, String imgA, String imgB) {
             return GameMyPageResponse.builder()
+                    .writerId(gameSet.getWriterId())
                     .gameSetId(gameSet.getId())
                     .title(gameSet.getTitle())
                     .optionAImg(imgA)
@@ -192,6 +196,7 @@ public class GameDto {
 
         public static GameMyPageResponse from(Game game, GameBookmark bookmark, String imgA, String imgB) {
             return GameMyPageResponse.builder()
+                    .writerId(game.getWriterId())
                     .gameSetId(game.getGameSet().getId())
                     .gameId(game.getId())
                     .title(game.getGameSet().getTitle())
@@ -206,6 +211,7 @@ public class GameDto {
 
         public static GameMyPageResponse from(Game game, GameVote vote, String imgA, String imgB) {
             return GameMyPageResponse.builder()
+                    .writerId(game.getWriterId())
                     .gameId(game.getId())
                     .title(game.getGameSet().getTitle())
                     .optionAImg(imgA)

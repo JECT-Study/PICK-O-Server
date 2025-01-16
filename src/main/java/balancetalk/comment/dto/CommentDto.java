@@ -24,7 +24,7 @@ public class CommentDto {
         @Schema(description = "댓글 내용", example = "댓글 내용...")
         private String content;
 
-        public Comment toEntity(Member member, TalkPick talkPick) {
+        public Comment toEntity(Member member, TalkPick talkPick, VoteOption voteOption) {
             return Comment.builder()
                     .content(content)
                     .member(member)
@@ -34,10 +34,11 @@ public class CommentDto {
                     .isNotifiedForFirstReply(false)
                     .editedAt(LocalDateTime.now())
                     .isEdited(false)
+                    .voteOption(voteOption)
                     .build();
         }
 
-        public Comment toEntity(Member member, TalkPick talkPick, Comment parent) {
+        public Comment toEntity(Member member, TalkPick talkPick, Comment parent, VoteOption voteOption) {
             return Comment.builder()
                     .content(content)
                     .member(member)
@@ -47,6 +48,7 @@ public class CommentDto {
                     .parent(parent)
                     .editedAt(LocalDateTime.now())
                     .isEdited(false)
+                    .voteOption(voteOption)
                     .build();
         }
     }

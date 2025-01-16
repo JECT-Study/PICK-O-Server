@@ -5,6 +5,7 @@ import balancetalk.global.notification.domain.NotificationHistory;
 import balancetalk.member.domain.Member;
 import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.domain.ViewStatus;
+import balancetalk.vote.domain.VoteOption;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -75,6 +76,9 @@ public class Comment extends BaseTimeEntity {
 
     private boolean isEdited;
 
+    @Enumerated(value = EnumType.STRING)
+    private VoteOption voteOption;
+
     @Embedded
     private NotificationHistory notificationHistory = new NotificationHistory();
 
@@ -97,5 +101,9 @@ public class Comment extends BaseTimeEntity {
             this.notificationHistory = new NotificationHistory();
         }
         return this.notificationHistory;
+    }
+
+    public void updateVoteOption(VoteOption voteOption) {
+        this.voteOption = voteOption;
     }
 }
