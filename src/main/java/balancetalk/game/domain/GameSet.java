@@ -92,6 +92,10 @@ public class GameSet extends BaseTimeEntity {
         return games.stream().anyMatch(game -> game.getId().equals(gameId));
     }
 
+    public Long getWriterId() {
+        return member.getId();
+    }
+
     public void addGames(List<Game> games) {
         this.games = games;
         games.forEach(game -> {
