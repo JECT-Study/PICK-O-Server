@@ -60,8 +60,16 @@ public class VoteTalkPickService {
 
         voteRepository.save(request.toEntity(member, talkPick));
 
+        updateCommentsVoteOption(talkPick, member, request.getVoteOption());
+
         sendVoteTalkPickNotification(talkPick);
         sendVoteTalkPickRatioNotification(talkPick);
+    }
+
+    private void updateCommentsVoteOption(TalkPick talkPick, Member member, VoteOption voteOption) {
+        talkPick.getComments().stream()
+                .filter(comment -> comment.getMember().equals(member))
+                .forEach(comment -> comment.updateVoteOption(voteOption));
     }
 
     @Transactional
@@ -73,6 +81,8 @@ public class VoteTalkPickService {
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_VOTE));
 
         vote.updateVoteOption(request.getVoteOption());
+        updateCommentsVoteOption(talkPick, member, request.getVoteOption());
+
         sendVoteTalkPickRatioNotification(talkPick);
     }
 
