@@ -36,6 +36,7 @@ public enum ErrorCode {
     INVALID_SOURCE_TYPE(BAD_REQUEST, "올바르지 않은 소스 타입입니다."),
     CANNOT_LOGOUT(BAD_REQUEST, "이미 로그아웃 상태입니다."),
     CACHE_VALUE_COOKIE_MISMATCH(BAD_REQUEST, "쿠키에 저장된 토큰 값과 캐시에 저장된 토큰 값이 일치하지 않습니다."),
+    INVALID_BALANCE_GAME_SEARCH_SORT(BAD_REQUEST, "올바르지 않은 밸런스게임 검색 정렬 조건입니다."),
 
     // 401
     MISMATCHED_EMAIL_OR_PASSWORD(UNAUTHORIZED, "이메일 또는 비밀번호가 잘못되었습니다."),
