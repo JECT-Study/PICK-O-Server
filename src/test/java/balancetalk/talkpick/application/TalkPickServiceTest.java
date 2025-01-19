@@ -1,10 +1,9 @@
 package balancetalk.talkpick.application;
 
-import static balancetalk.file.domain.FileType.*;
+import static balancetalk.file.domain.FileType.TALK_PICK;
 import static balancetalk.vote.domain.VoteOption.A;
 import static balancetalk.vote.domain.VoteOption.B;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
