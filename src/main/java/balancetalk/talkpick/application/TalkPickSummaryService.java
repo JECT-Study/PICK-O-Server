@@ -14,6 +14,7 @@ import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.talkpick.dto.fields.BaseTalkPickFields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -114,5 +115,19 @@ public class TalkPickSummaryService {
                 talkPick.getContent(),
                 talkPick.getOptionA(),
                 talkPick.getOptionB());
+    }
+
+    @Transactional
+    public void summarizeFailedTalkPick() {
+        List<TalkPick> summaryFailedTalkPicks = talkPickRepository.findAllBySummaryStatus(FAIL);
+        for (TalkPick summaryFailedTalkPick : summaryFailedTalkPicks) {
+            try {
+                summarize(summaryFailedTalkPick);
+            } catch (Exception e) {
+                log.error("Fail to summary TalkPick ID = {}", summaryFailedTalkPick.getId());
+                log.error("exception message = {} {}", e.getMessage(), e.getStackTrace());
+                summaryFailedTalkPick.updateSummaryStatus(FAIL);
+            }
+        }
     }
 }

@@ -2,7 +2,6 @@ package balancetalk.talkpick.domain.repository;
 
 import static balancetalk.talkpick.dto.TalkPickDto.TalkPickResponse;
 
-import balancetalk.talkpick.domain.SummaryStatus;
 import balancetalk.talkpick.domain.TalkPick;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -15,6 +14,4 @@ public interface TalkPickRepositoryCustom {
     Page<TalkPickResponse> findPagedTalkPicks(Pageable pageable);
 
     List<TalkPickResponse> findBestTalkPicks();
-
-    List<Long> findIdsBySummaryStatus(SummaryStatus summaryStatus);
 }
