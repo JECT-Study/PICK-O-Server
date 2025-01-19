@@ -1,24 +1,28 @@
 package balancetalk.talkpick.application;
 
+import static balancetalk.file.domain.FileType.TALK_PICK;
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_TALK_PICK;
 import static balancetalk.talkpick.dto.TalkPickDto.CreateTalkPickRequest;
 import static balancetalk.talkpick.dto.TalkPickDto.TalkPickDetailResponse;
 import static balancetalk.talkpick.dto.TalkPickDto.TalkPickResponse;
 import static balancetalk.talkpick.dto.TalkPickDto.UpdateTalkPickRequest;
 
+import balancetalk.file.domain.repository.FileRepository;
 import balancetalk.global.exception.BalanceTalkException;
 import balancetalk.member.domain.Member;
 import balancetalk.member.domain.MemberRepository;
 import balancetalk.member.dto.ApiMember;
 import balancetalk.member.dto.GuestOrApiMember;
 import balancetalk.talkpick.domain.TalkPick;
-import balancetalk.talkpick.domain.TalkPickFileHandler;
-import balancetalk.talkpick.domain.TalkPickSummarizer;
+import balancetalk.talkpick.domain.event.TalkPickCreatedEvent;
+import balancetalk.talkpick.domain.event.TalkPickDeletedEvent;
+import balancetalk.talkpick.domain.event.TalkPickUpdatedEvent;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.vote.domain.TalkPickVote;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,8 +34,8 @@ public class TalkPickService {
 
     private final MemberRepository memberRepository;
     private final TalkPickRepository talkPickRepository;
-    private final TalkPickFileHandler talkPickFileHandler;
-    private final TalkPickSummarizer talkPickSummarizer;
+    private final ApplicationEventPublisher eventPublisher;
+    private final FileRepository fileRepository;
 
     @Transactional
     public Long createTalkPick(CreateTalkPickRequest request, ApiMember apiMember) {
@@ -39,11 +43,7 @@ public class TalkPickService {
         TalkPick savedTalkPick = talkPickRepository.save(request.toEntity(member));
         Long savedTalkPickId = savedTalkPick.getId();
 
-        if (request.containsFileIds()) {
-            talkPickFileHandler.handleFilesOnTalkPickCreate(request.getFileIds(), savedTalkPickId);
-        }
-
-        talkPickSummarizer.summarizeTalkPick(savedTalkPickId);
+        eventPublisher.publishEvent(new TalkPickCreatedEvent(savedTalkPickId, request.getFileIds()));
 
         return savedTalkPickId;
     }
@@ -54,8 +54,8 @@ public class TalkPickService {
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
         talkPick.increaseViews();
 
-        List<String> imgUrls = talkPickFileHandler.findImgUrlsBy(talkPickId);
-        List<Long> fileIds = talkPickFileHandler.findFileIdsBy(talkPickId);
+        List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPickId, TALK_PICK);
+        List<Long> fileIds = fileRepository.findIdsByResourceIdAndFileType(talkPickId, TALK_PICK);
 
         if (guestOrApiMember.isGuest()) {
             return TalkPickDetailResponse.from(talkPick, imgUrls, fileIds, false, null);
@@ -85,9 +85,9 @@ public class TalkPickService {
         Member member = apiMember.toMember(memberRepository);
         TalkPick talkPick = member.getTalkPickById(talkPickId);
         talkPick.update(request.toEntity(member));
-        talkPickFileHandler
-                .handleFilesOnTalkPickUpdate(request.getNewFileIds(), request.getDeleteFileIds(), talkPickId);
-        talkPickSummarizer.summarizeTalkPick(talkPickId);
+
+        eventPublisher.publishEvent(
+                new TalkPickUpdatedEvent(talkPickId, request.getNewFileIds(), request.getDeleteFileIds()));
     }
 
     @Transactional
@@ -95,6 +95,7 @@ public class TalkPickService {
         Member member = apiMember.toMember(memberRepository);
         TalkPick talkPick = member.getTalkPickById(talkPickId);
         talkPickRepository.delete(talkPick);
-        talkPickFileHandler.handleFilesOnTalkPickDelete(talkPickId);
+
+        eventPublisher.publishEvent(new TalkPickDeletedEvent(talkPickId));
     }
 }
