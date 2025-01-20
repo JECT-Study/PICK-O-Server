@@ -1,4 +1,4 @@
-package balancetalk.talkpick.domain;
+package balancetalk.talkpick.application;
 
 import static balancetalk.file.domain.FileType.TALK_PICK;
 
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class TalkPickFileHandler {
+public class TalkPickFileService {
 
     private final FileRepository fileRepository;
     private final FileHandler fileHandler;
@@ -24,20 +24,15 @@ public class TalkPickFileHandler {
     @Retryable(backoff = @Backoff(delay = 1000))
     @Transactional
     public void handleFilesOnTalkPickCreate(List<Long> fileIds, Long talkPickId) {
+        if (fileIds == null || fileIds.isEmpty()) {
+            return;
+        }
         relocateFiles(fileIds, talkPickId);
     }
 
     private void relocateFiles(List<Long> fileIds, Long talkPickId) {
         List<File> files = fileRepository.findAllById(fileIds);
         fileHandler.relocateFiles(files, talkPickId, TALK_PICK);
-    }
-
-    public List<String> findImgUrlsBy(Long talkPickId) {
-        return fileRepository.findImgUrlsByResourceIdAndFileType(talkPickId, TALK_PICK);
-    }
-
-    public List<Long> findFileIdsBy(Long talkPickId) {
-        return fileRepository.findIdsByResourceIdAndFileType(talkPickId, TALK_PICK);
     }
 
     @Async

@@ -1,4 +1,4 @@
-package balancetalk.talkpick.domain;
+package balancetalk.talkpick.application;
 
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_TALK_PICK;
 import static balancetalk.global.exception.ErrorCode.TALK_PICK_SUMMARY_FAILED;
@@ -8,10 +8,13 @@ import static balancetalk.talkpick.domain.SummaryStatus.NOT_REQUIRED;
 import static balancetalk.talkpick.domain.SummaryStatus.SUCCESS;
 
 import balancetalk.global.exception.BalanceTalkException;
+import balancetalk.talkpick.domain.Summary;
+import balancetalk.talkpick.domain.TalkPick;
 import balancetalk.talkpick.domain.repository.TalkPickRepository;
 import balancetalk.talkpick.dto.fields.BaseTalkPickFields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class TalkPickSummarizer {
+public class TalkPickSummaryService {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String SYSTEM_MESSAGE = """
@@ -57,7 +60,6 @@ public class TalkPickSummarizer {
     public void summarizeTalkPick(Long talkPickId) {
         TalkPick talkPick = talkPickRepository.findById(talkPickId)
                 .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
-
 
         // 본문 글자수가 너무 짧으면 요약 제공 안함
         if (talkPick.hasShortContent()) {
@@ -113,5 +115,19 @@ public class TalkPickSummarizer {
                 talkPick.getContent(),
                 talkPick.getOptionA(),
                 talkPick.getOptionB());
+    }
+
+    @Transactional
+    public void summarizeFailedTalkPick() {
+        List<TalkPick> summaryFailedTalkPicks = talkPickRepository.findAllBySummaryStatus(FAIL);
+        for (TalkPick summaryFailedTalkPick : summaryFailedTalkPicks) {
+            try {
+                summarize(summaryFailedTalkPick);
+            } catch (Exception e) {
+                log.error("Fail to summary TalkPick ID = {}", summaryFailedTalkPick.getId());
+                log.error("exception message = {} {}", e.getMessage(), e.getStackTrace());
+                summaryFailedTalkPick.updateSummaryStatus(FAIL);
+            }
+        }
     }
 }
