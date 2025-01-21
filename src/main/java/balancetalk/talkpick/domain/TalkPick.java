@@ -70,12 +70,12 @@ public class TalkPick extends BaseTimeEntity {
     private String content;
 
     @NotBlank
-    @Size(max = 10)
+    @Size(max = 30)
     @Column(name = "option_a")
     private String optionA;
 
     @NotBlank
-    @Size(max = 10)
+    @Size(max = 30)
     @Column(name = "option_b")
     private String optionB;
 
