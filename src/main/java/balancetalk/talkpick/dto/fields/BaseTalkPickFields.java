@@ -21,11 +21,11 @@ public class BaseTalkPickFields {
     private String content;
 
     @Schema(description = "선택지 A 이름", example = "선택지 A 이름")
-    @Size(max = 30, message = "선택지 이름은 10자 이하여야 합니다.")
+    @Size(max = 30, message = "선택지 이름은 30자 이하여야 합니다.")
     private String optionA;
 
     @Schema(description = "선택지 B 이름", example = "선택지 B 이름")
-    @Size(max = 30, message = "선택지 이름은 10자 이하여야 합니다.")
+    @Size(max = 30, message = "선택지 이름은 30자 이하여야 합니다.")
     private String optionB;
 
     @Schema(description = "출처 URL", example = "https://github.com/CHZZK-Study/Balance-Talk-Backend/issues/506")
