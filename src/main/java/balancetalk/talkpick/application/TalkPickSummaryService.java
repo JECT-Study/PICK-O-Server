@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -55,7 +55,7 @@ public class TalkPickSummaryService {
     private final ChatClient chatClient;
     private final TalkPickRepository talkPickRepository;
 
-    @Async
+    @Async("talkPickSummaryTaskExecutor")
     @Transactional
     public void summarizeTalkPick(Long talkPickId) {
         TalkPick talkPick = talkPickRepository.findById(talkPickId)
