@@ -212,6 +212,7 @@ public class GameDto {
         public static GameMyPageResponse from(Game game, GameVote vote, String imgA, String imgB) {
             return GameMyPageResponse.builder()
                     .writerId(game.getWriterId())
+                    .gameSetId(game.getGameSet().getId())
                     .gameId(game.getId())
                     .title(game.getGameSet().getTitle())
                     .optionAImg(imgA)
