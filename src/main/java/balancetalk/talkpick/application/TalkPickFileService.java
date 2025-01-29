@@ -20,7 +20,7 @@ public class TalkPickFileService {
     private final FileRepository fileRepository;
     private final FileHandler fileHandler;
 
-    @Async
+    @Async("fileMappingTaskExecutor")
     @Retryable(backoff = @Backoff(delay = 1000))
     @Transactional
     public void handleFilesOnTalkPickCreate(List<Long> fileIds, Long talkPickId) {

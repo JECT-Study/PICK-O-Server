@@ -55,7 +55,7 @@ public class TalkPickSummaryService {
     private final ChatClient chatClient;
     private final TalkPickRepository talkPickRepository;
 
-    @Async
+    @Async("talkPickSummaryTaskExecutor")
     @Transactional
     public void summarizeTalkPick(Long talkPickId) {
         TalkPick talkPick = talkPickRepository.findById(talkPickId)
