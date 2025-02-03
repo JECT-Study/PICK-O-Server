@@ -84,7 +84,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
               JOIN go2.game g3 
               WHERE gv2.member.id = :memberId 
               AND g3.gameSet.id = g.gameSet.id) DESC
-""")
+        """)
     List<Game> findLatestVotedGamesByMember(@Param("memberId") Long memberId);
 
 }

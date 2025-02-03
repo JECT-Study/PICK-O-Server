@@ -210,7 +210,8 @@ public class GameDto {
                     .build();
         }
 
-        public static GameMyPageResponse from(Game game, GameBookmark gameBookmark, GameVote vote, String imgA, String imgB) {
+        public static GameMyPageResponse from(Game game, GameBookmark gameBookmark, GameVote vote,
+                                              String imgA, String imgB) {
             return GameMyPageResponse.builder()
                     .writerId(game.getWriterId())
                     .gameSetId(game.getGameSet().getId())
