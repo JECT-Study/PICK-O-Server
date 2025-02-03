@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 public interface VoteRepository extends JpaRepository<GameVote, Long> {
 
     // [1] "내가 투표한 밸런스게임 목록" 전용: 비활성화 포함 (isActive 조건 제거)
-    GameVote findTopByMember_IdAndGameOption_IdInOrderByCreatedAtDesc(
+    GameVote findTopByMemberIdAndGameOptionIdInOrderByCreatedAtDesc(
             Long memberId,
             List<Long> gameOptionIds
     );
