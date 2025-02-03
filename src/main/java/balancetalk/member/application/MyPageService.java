@@ -136,7 +136,7 @@ public class MyPageService {
 
         List<GameMyPageResponse> responses = latestGames.stream()
                 .map(game -> {
-                    GameVote vote = voteRepository.findLatestVoteByMemberIdAndGameOptionIds(
+                    GameVote vote = voteRepository.findTopByMember_IdAndGameOption_IdInOrderByCreatedAtDesc(
                             member.getId(), game.getGameOptions().stream()
                                     .map(GameOption::getId)
                                     .toList()
