@@ -131,17 +131,22 @@ public class MyPageService {
     public Page<GameMyPageResponse> findAllVotedGames(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
 
-        Page<GameVote> votes = voteRepository.findAllByMemberIdAndGameDesc(member.getId(), pageable);
+        List<Game> latestGames = gameRepository.findLatestVotedGamesByMember(member.getId());
 
-        List<GameMyPageResponse> responses = votes.stream()
-                .map(vote -> {
-                    Game game = gameRepository.findById(vote.getGameOption().getGame().getId())
-                            .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME));
+        List<GameMyPageResponse> responses = latestGames.stream()
+                .map(game -> {
+                    GameVote vote = voteRepository.findFirstByMemberIdAndGameOptionIdIn(
+                            member.getId(), game.getGameOptions().stream()
+                                    .map(GameOption::getId)
+                                    .toList()
+                    );
+
                     return createGameMyPageResponse(game, vote);
                 })
                 .toList();
 
-        return new PageImpl<>(responses, pageable, votes.getTotalElements());
+
+        return new PageImpl<>(responses, pageable, responses.size());
     }
 
     public Page<GameMyPageResponse> findAllGamesByMember(ApiMember apiMember, Pageable pageable) {

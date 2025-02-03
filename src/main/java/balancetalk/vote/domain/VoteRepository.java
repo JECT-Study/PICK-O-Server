@@ -1,17 +1,21 @@
 package balancetalk.vote.domain;
 
 import balancetalk.game.domain.GameSet;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 
 public interface VoteRepository extends JpaRepository<GameVote, Long> {
 
-    @Query("SELECT v FROM GameVote v WHERE v.member.id = :memberId AND v.gameOption IS NOT NULL ORDER BY v.lastModifiedAt DESC")
-    Page<GameVote> findAllByMemberIdAndGameDesc(Long memberId, Pageable pageable);
-
+    @Query("""
+    SELECT gv FROM GameVote gv
+    WHERE gv.member.id = :memberId
+    AND gv.gameOption.id IN :gameOptionIds
+    ORDER BY gv.createdAt DESC
+    LIMIT 1""")
+    GameVote findFirstByMemberIdAndGameOptionIdIn(@Param("memberId") Long memberId,
+                                                  @Param("gameOptionIds") List<Long> gameOptionIds);
     void deleteAllByMemberIdAndGameOption_Game_GameSet(Long memberId, GameSet gameSet);
 }
