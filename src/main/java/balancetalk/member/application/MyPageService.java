@@ -113,7 +113,7 @@ public class MyPageService {
                     Game game = gameRepository.findById(bookmark.getGameId()) // 사용자가 북마크한 위치의 밸런스게임을 찾음
                             .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME));
 
-                    return createGameMyPageResponse(game, bookmark);
+                    return createGameMyPageResponse(game, null, bookmark);
                 })
                 .toList();
 
@@ -141,7 +141,9 @@ public class MyPageService {
                                     .toList()
                     );
 
-                    return createGameMyPageResponse(game, vote);
+                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member, game.getGameSet().getId())
+                            .orElse(null);
+                    return createGameMyPageResponse(game, gameBookmark, vote);
                 })
                 .toList();
 
@@ -156,14 +158,16 @@ public class MyPageService {
         List<GameMyPageResponse> responses = gameSets.stream()
                 .map(gameSet -> {
                     Game game = gameSet.getGames().get(0);
-                    return createGameMyPageResponse(game, game);
+                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member, gameSet.getId())
+                            .orElse(null);
+                    return createGameMyPageResponse(game, gameBookmark, game);
                 })
                 .toList();
 
         return new PageImpl<>(responses, pageable, gameSets.getTotalElements());
     }
 
-    private GameMyPageResponse createGameMyPageResponse(Game game, Object source) {
+    private GameMyPageResponse createGameMyPageResponse(Game game, GameBookmark gameBookmark, Object source) {
         List<Long> resourceIds = getResourceIds(game);
         List<File> files = fileRepository.findAllByResourceIdsAndFileType(resourceIds, FileType.GAME_OPTION);
         String imgA = files.isEmpty() ? null : game.getImgA(files);
@@ -172,8 +176,10 @@ public class MyPageService {
         return Stream.of(
                 new SourceHandler<>(GameBookmark.class, bookmark
                         -> GameMyPageResponse.from(game, bookmark, imgA, imgB)),
-                new SourceHandler<>(GameVote.class, vote -> GameMyPageResponse.from(game, vote, imgA, imgB)),
-                new SourceHandler<>(Game.class, myGame -> GameMyPageResponse.from(myGame.getGameSet(), imgA, imgB))
+                new SourceHandler<>(GameVote.class, vote -> GameMyPageResponse.from(game, gameBookmark,
+                        vote, imgA, imgB)),
+                new SourceHandler<>(Game.class, myGame -> GameMyPageResponse.from(myGame.getGameSet(),
+                        gameBookmark, imgA, imgB))
         )
                 .filter(handler -> handler.getType().isInstance(source))
                 .findFirst()

@@ -181,7 +181,7 @@ public class GameDto {
         @Schema(description = "밸런스 게임 메인 태그 이름", example = "인기")
         private String mainTagName;
 
-        public static GameMyPageResponse from(GameSet gameSet, String imgA, String imgB) {
+        public static GameMyPageResponse from(GameSet gameSet, GameBookmark gameBookmark, String imgA, String imgB) {
             return GameMyPageResponse.builder()
                     .writerId(gameSet.getWriterId())
                     .gameSetId(gameSet.getId())
@@ -190,6 +190,7 @@ public class GameDto {
                     .optionBImg(imgB)
                     .subTag(gameSet.getSubTag())
                     .mainTagName(gameSet.getMainTag().getName())
+                    .isBookmarked(isBookmarkedAndNotNull(gameBookmark))
                     .editedAt(gameSet.getEditedAt())
                     .build();
         }
@@ -209,7 +210,7 @@ public class GameDto {
                     .build();
         }
 
-        public static GameMyPageResponse from(Game game, GameVote vote, String imgA, String imgB) {
+        public static GameMyPageResponse from(Game game, GameBookmark gameBookmark, GameVote vote, String imgA, String imgB) {
             return GameMyPageResponse.builder()
                     .writerId(game.getWriterId())
                     .gameSetId(game.getGameSet().getId())
@@ -220,8 +221,14 @@ public class GameDto {
                     .voteOption(vote.getVoteOption())
                     .subTag(game.getGameSet().getSubTag())
                     .mainTagName(game.getGameSet().getMainTag().getName())
+                    .isBookmarked(isBookmarkedAndNotNull(gameBookmark))
                     .editedAt(game.getEditedAt())
                     .build();
+        }
+
+
+        private static boolean isBookmarkedAndNotNull(GameBookmark gameBookmark) {
+            return (gameBookmark != null) && gameBookmark.isActive();
         }
     }
 
