@@ -24,6 +24,7 @@ public class VoteGameDto {
             return GameVote.builder()
                     .member(member)
                     .gameOption(gameOption)
+                    .isActive(true)
                     .build();
         }
     }

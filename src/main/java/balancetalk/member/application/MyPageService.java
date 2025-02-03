@@ -28,6 +28,7 @@ import balancetalk.vote.domain.TalkPickVote;
 import balancetalk.vote.domain.TalkPickVoteRepository;
 import balancetalk.vote.domain.GameVote;
 import balancetalk.vote.domain.VoteRepository;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -135,16 +136,22 @@ public class MyPageService {
 
         List<GameMyPageResponse> responses = latestGames.stream()
                 .map(game -> {
-                    GameVote vote = voteRepository.findFirstByMemberIdAndGameOptionIdIn(
+                    GameVote vote = voteRepository.findLatestVoteByMemberIdAndGameOptionIds(
                             member.getId(), game.getGameOptions().stream()
                                     .map(GameOption::getId)
                                     .toList()
                     );
 
-                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member, game.getGameSet().getId())
+                    if (vote == null) {
+                        return null;
+                    }
+
+                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member,
+                                    game.getGameSet().getId())
                             .orElse(null);
                     return createGameMyPageResponse(game, gameBookmark, vote);
                 })
+                .filter(Objects::nonNull)
                 .toList();
 
 
