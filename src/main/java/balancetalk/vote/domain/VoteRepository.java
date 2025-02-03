@@ -11,16 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface VoteRepository extends JpaRepository<GameVote, Long> {
 
-    @Query("""
-    SELECT gv FROM GameVote gv
-    WHERE gv.member.id = :memberId
-    AND gv.isActive = true
-    AND gv.gameOption.id IN :gameOptionIds
-    ORDER BY gv.createdAt DESC
-    LIMIT 1
-""")
-    GameVote findFirstByMemberIdAndGameOptionIdIn(@Param("memberId") Long memberId, @Param("gameOptionIds") List<Long> gameOptionIds);
-
     // [1] "내가 투표한 밸런스게임 목록" 전용: 비활성화 포함 (isActive 조건 제거)
     @Query("""
         SELECT gv
@@ -35,7 +25,7 @@ public interface VoteRepository extends JpaRepository<GameVote, Long> {
             @Param("gameOptionIds") List<Long> gameOptionIds
     );
 
-    // [2] 활성화된 투표만 조회 (기존 로직 그대로 사용 - 필요하면 유지)
+    // [2] 활성화된 투표만 조회 (기존 로직 그대로 사용 - 추후 사용 염두)
     @Query("""
         SELECT gv
         FROM GameVote gv
