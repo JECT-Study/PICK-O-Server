@@ -97,7 +97,7 @@ public class BookmarkGameService {
                             increaseBookmarkCountForActivation(bookmark, gameSet);
                             bookmark.activate();
                             bookmark.setIsEndGameSet(true); // 밸런스게임 세트 종료 표시
-                            voteRepository.deleteAllByMemberIdAndGameOption_Game_GameSet(member.getId(), gameSet);
+                            voteRepository.updateVotesAsInactive(member.getId(), gameSet);
                             bookmark.updateGameId(gameId); //gameId도 업데이트
                         },
                         () -> { // resourceId가 gameSetId와 일치하는 북마크가 없다면 새로 생성

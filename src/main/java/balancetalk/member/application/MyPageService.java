@@ -28,6 +28,7 @@ import balancetalk.vote.domain.TalkPickVote;
 import balancetalk.vote.domain.TalkPickVoteRepository;
 import balancetalk.vote.domain.GameVote;
 import balancetalk.vote.domain.VoteRepository;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -113,7 +114,7 @@ public class MyPageService {
                     Game game = gameRepository.findById(bookmark.getGameId()) // 사용자가 북마크한 위치의 밸런스게임을 찾음
                             .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME));
 
-                    return createGameMyPageResponse(game, bookmark);
+                    return createGameMyPageResponse(game, null, bookmark);
                 })
                 .toList();
 
@@ -131,17 +132,30 @@ public class MyPageService {
     public Page<GameMyPageResponse> findAllVotedGames(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
 
-        Page<GameVote> votes = voteRepository.findAllByMemberIdAndGameDesc(member.getId(), pageable);
+        List<Game> latestGames = gameRepository.findLatestVotedGamesByMember(member.getId());
 
-        List<GameMyPageResponse> responses = votes.stream()
-                .map(vote -> {
-                    Game game = gameRepository.findById(vote.getGameOption().getGame().getId())
-                            .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME));
-                    return createGameMyPageResponse(game, vote);
+        List<GameMyPageResponse> responses = latestGames.stream()
+                .map(game -> {
+                    GameVote vote = voteRepository.findTopByMemberIdAndGameOptionIdInOrderByCreatedAtDesc(
+                            member.getId(), game.getGameOptions().stream()
+                                    .map(GameOption::getId)
+                                    .toList()
+                    );
+
+                    if (vote == null) {
+                        return null;
+                    }
+
+                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member,
+                                    game.getGameSet().getId())
+                            .orElse(null);
+                    return createGameMyPageResponse(game, gameBookmark, vote);
                 })
+                .filter(Objects::nonNull)
                 .toList();
 
-        return new PageImpl<>(responses, pageable, votes.getTotalElements());
+
+        return new PageImpl<>(responses, pageable, responses.size());
     }
 
     public Page<GameMyPageResponse> findAllGamesByMember(ApiMember apiMember, Pageable pageable) {
@@ -151,14 +165,16 @@ public class MyPageService {
         List<GameMyPageResponse> responses = gameSets.stream()
                 .map(gameSet -> {
                     Game game = gameSet.getGames().get(0);
-                    return createGameMyPageResponse(game, game);
+                    GameBookmark gameBookmark = gameBookmarkRepository.findByMemberAndGameSetId(member, gameSet.getId())
+                            .orElse(null);
+                    return createGameMyPageResponse(game, gameBookmark, game);
                 })
                 .toList();
 
         return new PageImpl<>(responses, pageable, gameSets.getTotalElements());
     }
 
-    private GameMyPageResponse createGameMyPageResponse(Game game, Object source) {
+    private GameMyPageResponse createGameMyPageResponse(Game game, GameBookmark gameBookmark, Object source) {
         List<Long> resourceIds = getResourceIds(game);
         List<File> files = fileRepository.findAllByResourceIdsAndFileType(resourceIds, FileType.GAME_OPTION);
         String imgA = files.isEmpty() ? null : game.getImgA(files);
@@ -167,8 +183,10 @@ public class MyPageService {
         return Stream.of(
                 new SourceHandler<>(GameBookmark.class, bookmark
                         -> GameMyPageResponse.from(game, bookmark, imgA, imgB)),
-                new SourceHandler<>(GameVote.class, vote -> GameMyPageResponse.from(game, vote, imgA, imgB)),
-                new SourceHandler<>(Game.class, myGame -> GameMyPageResponse.from(myGame.getGameSet(), imgA, imgB))
+                new SourceHandler<>(GameVote.class, vote -> GameMyPageResponse.from(game, gameBookmark,
+                        vote, imgA, imgB)),
+                new SourceHandler<>(Game.class, myGame -> GameMyPageResponse.from(myGame.getGameSet(),
+                        gameBookmark, imgA, imgB))
         )
                 .filter(handler -> handler.getType().isInstance(source))
                 .findFirst()

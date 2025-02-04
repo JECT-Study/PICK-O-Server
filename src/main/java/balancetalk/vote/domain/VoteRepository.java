@@ -1,17 +1,41 @@
 package balancetalk.vote.domain;
 
 import balancetalk.game.domain.GameSet;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 
 public interface VoteRepository extends JpaRepository<GameVote, Long> {
 
-    @Query("SELECT v FROM GameVote v WHERE v.member.id = :memberId AND v.gameOption IS NOT NULL ORDER BY v.lastModifiedAt DESC")
-    Page<GameVote> findAllByMemberIdAndGameDesc(Long memberId, Pageable pageable);
+    // [1] "내가 투표한 밸런스게임 목록" 전용: 비활성화 포함 (isActive 조건 제거)
+    GameVote findTopByMemberIdAndGameOptionIdInOrderByCreatedAtDesc(
+            Long memberId,
+            List<Long> gameOptionIds
+    );
 
-    void deleteAllByMemberIdAndGameOption_Game_GameSet(Long memberId, GameSet gameSet);
+    // [2] 활성화된 투표만 조회 (기존 로직 그대로 사용 - 추후 사용 염두)
+    @Query("""
+        SELECT gv
+        FROM GameVote gv
+        WHERE gv.member.id = :memberId
+          AND gv.gameOption.game.id = :gameId
+          AND gv.isActive = true
+        """)
+    Optional<GameVote> findActiveVoteByMemberIdAndGameId(@Param("memberId") Long memberId,
+                                                         @Param("gameId") Long gameId);
+
+    @Modifying
+    @Query("""
+        UPDATE GameVote gv SET gv.isActive = false 
+        WHERE gv.member.id = :memberId AND gv.gameOption.game.gameSet = :gameSet
+        """)
+    void updateVotesAsInactive(@Param("memberId") Long memberId, @Param("gameSet") GameSet gameSet);
+
+    // 특정 사용자가 특정 게임에 대해 투표한 기록 조회 (비활성화된 투표도 포함)
+    @Query("SELECT gv FROM GameVote gv WHERE gv.member.id = :memberId AND gv.gameOption.game.id = :gameId")
+    Optional<GameVote> findByMemberIdAndGameId(@Param("memberId") Long memberId, @Param("gameId") Long gameId);
 }

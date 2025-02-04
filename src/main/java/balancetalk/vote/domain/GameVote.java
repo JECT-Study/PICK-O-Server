@@ -35,6 +35,8 @@ public class GameVote extends BaseTimeEntity {
     @JoinColumn(name = "game_option_id")
     private GameOption gameOption;
 
+    private boolean isActive;
+
     public VoteOption getVoteOption() {
         return gameOption.getOptionType();
     }
@@ -46,5 +48,9 @@ public class GameVote extends BaseTimeEntity {
 
     public void updateGameOption(GameOption gameOption) {
         this.gameOption = gameOption;
+    }
+
+    public void updateActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

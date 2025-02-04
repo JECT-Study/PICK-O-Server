@@ -1,6 +1,7 @@
 package balancetalk.game.domain.repository;
 
 import balancetalk.game.domain.Game;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -66,4 +67,24 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             @Param("sort") String sort,
             Pageable pageable
     );
+
+    @Query("""
+    SELECT g FROM Game g
+    WHERE g.id = (
+        SELECT g2.id FROM GameVote gv
+        JOIN gv.gameOption go
+        JOIN go.game g2
+        WHERE gv.member.id = :memberId
+        AND g2.gameSet.id = g.gameSet.id
+        ORDER BY gv.createdAt DESC
+        LIMIT 1
+    )
+    ORDER BY (SELECT MAX(gv2.createdAt) FROM GameVote gv2 
+              JOIN gv2.gameOption go2 
+              JOIN go2.game g3 
+              WHERE gv2.member.id = :memberId 
+              AND g3.gameSet.id = g.gameSet.id) DESC
+        """)
+    List<Game> findLatestVotedGamesByMember(@Param("memberId") Long memberId);
+
 }

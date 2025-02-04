@@ -40,24 +40,33 @@ public class VoteGameService {
 
     public void createVote(Long gameId, VoteRequest request, ApiMember apiMember) {
         Member member = apiMember.toMember(memberRepository);
-
         Game game = gameReader.findGameById(gameId);
         GameOption gameOption = getGameOption(game, request);
 
         if (member.hasVotedGame(game)) {
             throw new BalanceTalkException(ErrorCode.ALREADY_VOTE);
         }
-        voteRepository.save(request.toEntity(member, gameOption));
+
+        Optional<GameVote> existingVote = voteRepository.findByMemberIdAndGameId(member.getId(), gameId);
+
+        if (existingVote.isPresent()) {
+            // 기존 투표를 활성화하고 선택한 옵션을 변경
+            GameVote vote = existingVote.get();
+            vote.updateActive(true);
+            vote.updateGameOption(gameOption);
+        } else {
+            // 새로운 투표 생성
+            voteRepository.save(request.toEntity(member, gameOption));
+        }
         gameOption.increaseVotesCount();
         sendVoteGameNotification(game.getGameSet());
     }
 
     public void updateVote(Long gameId, VoteRequest request, ApiMember apiMember) {
         Game game = gameReader.findGameById(gameId);
-
         Member member = apiMember.toMember(memberRepository);
-
         Optional<GameVote> voteOnGame = member.getVoteOnGame(game);
+
         if (voteOnGame.isEmpty()) {
             throw new BalanceTalkException(ErrorCode.NOT_FOUND_VOTE);
         }
@@ -90,16 +99,16 @@ public class VoteGameService {
 
     public void deleteVote(Long gameId, ApiMember apiMember) {
         Game game = gameReader.findGameById(gameId);
-
         Member member = apiMember.toMember(memberRepository);
 
         Optional<GameVote> voteOnGame = member.getVoteOnGame(game);
+
         if (voteOnGame.isEmpty()) {
             throw new BalanceTalkException(ErrorCode.NOT_FOUND_VOTE);
         }
-        voteRepository.delete(voteOnGame.get());
 
         GameVote vote = voteOnGame.get();
+        vote.updateActive(false);
         vote.getGameOption().decreaseVotesCount(); // 해당 선택지의 투표수 감소
     }
 
