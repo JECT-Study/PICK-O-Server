@@ -54,6 +54,7 @@ public class TodayTalkPickService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TodayTalkPickResponse> findTodayTalkPick() {
         return todayTalkPickRepository.findByPickDate(LocalDate.now())
                 .stream()
