@@ -184,7 +184,8 @@ public class GameService {
         boolean isEndGameSet = (gameBookmark != null) && gameBookmark.getIsEndGameSet();
 
         Map<Long, VoteOption> voteOptionMap = gameSet.getGames().stream()
-                .map(game -> Map.entry(game.getId(), member.getVoteOnGameOption(member, game).map(GameVote::getVoteOption).orElse(null)))
+                .map(game -> Map.entry(game.getId(),
+                        member.getVoteOnGameOption(member, game).map(GameVote::getVoteOption).orElse(null)))
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return GameSetDetailResponse.fromEntity(gameSet, gameBookmark, isEndGameSet,
