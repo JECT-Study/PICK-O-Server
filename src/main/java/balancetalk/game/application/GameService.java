@@ -302,4 +302,10 @@ public class GameService {
         MainTag mainTag = request.toEntity();
         mainTagRepository.save(mainTag);
     }
+
+    @Transactional(readOnly = true)
+    public GameSetDetailResponse findRandomGame(final GuestOrApiMember guestOrApiMember) {
+        Long randomGameSetId = gameSetRepository.findRandomGameSetId();
+        return findBalanceGameSet(randomGameSetId, guestOrApiMember);
+    }
 }

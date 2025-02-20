@@ -81,4 +81,11 @@ public class GameController {
         Pageable pageable = PageRequest.of(page, size);
         return gameService.findPopularGames(tagName, pageable, guestOrApiMember);
     }
+
+    @GetMapping("/random")
+    @Operation(summary = "랜덤 밸런스 게임 조회",
+        description = "랜덤으로 id를 가져와 밸런스 게임을 조회한다.")
+    public GameSetDetailResponse findRandomGame(@AuthPrincipal final GuestOrApiMember guestOrApiMember) {
+        return gameService.findRandomGame(guestOrApiMember);
+    }
 }
