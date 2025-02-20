@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface GameSetRepository extends JpaRepository<GameSet, Long> , GameSetRepositoryCustom{
+public interface GameSetRepository extends JpaRepository<GameSet, Long> ,GameSetRepositoryCustom {
 
     Page<GameSet> findAllByMemberIdOrderByEditedAtDesc(Long memberId, Pageable pageable);
 

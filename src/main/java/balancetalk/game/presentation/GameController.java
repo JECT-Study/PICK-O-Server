@@ -50,6 +50,13 @@ public class GameController {
         return gameService.findBalanceGameSet(gameSetId, guestOrApiMember);
     }
 
+    @GetMapping("/random")
+    @Operation(summary = "랜덤 밸런스 게임 조회",
+            description = "랜덤으로 id를 가져와 밸런스 게임을 조회한다.")
+    public GameSetDetailResponse findRandomGame(@AuthPrincipal final GuestOrApiMember guestOrApiMember) {
+        return gameService.findRandomGame(guestOrApiMember);
+    }
+
     @DeleteMapping("/{gameSetId}")
     @Operation(summary = "밸런스 게임 세트 삭제", description = "밸런스 게임 세트를 삭제합니다.")
     public void deleteGameSet(@PathVariable final Long gameSetId,
@@ -80,12 +87,5 @@ public class GameController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return gameService.findPopularGames(tagName, pageable, guestOrApiMember);
-    }
-
-    @GetMapping("/random")
-    @Operation(summary = "랜덤 밸런스 게임 조회",
-        description = "랜덤으로 id를 가져와 밸런스 게임을 조회한다.")
-    public GameSetDetailResponse findRandomGame(@AuthPrincipal final GuestOrApiMember guestOrApiMember) {
-        return gameService.findRandomGame(guestOrApiMember);
     }
 }

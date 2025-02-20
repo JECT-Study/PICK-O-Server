@@ -8,6 +8,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class GameSetRepositoryCustomImpl implements GameSetRepositoryCustom {
         }
 
         // 2. 랜덤 ID 생성
-        long randomId = min + (long)(Math.random() * (max - min + 1));
+        long randomId = ThreadLocalRandom.current().nextLong(min, max + 1);
 
         // 3. randomId 이상의 첫 번째 ID 조회
         Long result = queryFactory
