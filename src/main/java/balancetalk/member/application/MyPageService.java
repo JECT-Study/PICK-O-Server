@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,7 @@ public class MyPageService {
     private final GameSetRepository gameSetRepository;
     private final FileRepository fileRepository;
 
+    @Transactional(readOnly = true)
     public Page<TalkPickMyPageResponse> findAllBookmarkedTalkPicks(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<TalkPickBookmark> bookmarks =
@@ -71,6 +73,7 @@ public class MyPageService {
         return new PageImpl<>(responses, pageable, bookmarks.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Page<TalkPickMyPageResponse> findAllVotedTalkPicks(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<TalkPickVote> votes = talkPickVoteRepository.findAllByMemberIdAndTalkPickDesc(member.getId(), pageable);
@@ -82,6 +85,7 @@ public class MyPageService {
         return new PageImpl<>(responses, pageable, votes.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Page<TalkPickMyPageResponse> findAllCommentedTalkPicks(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<Comment> comments =
@@ -94,6 +98,7 @@ public class MyPageService {
         return new PageImpl<>(responses, pageable, comments.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Page<TalkPickMyPageResponse> findAllTalkPicksByMember(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<TalkPick> talkPicks = talkPickRepository.findAllByMemberIdOrderByEditedAtDesc(member.getId(), pageable);
@@ -105,6 +110,7 @@ public class MyPageService {
         return new PageImpl<>(responses, pageable, talkPicks.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Page<GameMyPageResponse> findAllBookmarkedGames(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<GameBookmark> bookmarks = gameBookmarkRepository.findActivatedByMemberOrderByDesc(member, pageable);
@@ -128,7 +134,7 @@ public class MyPageService {
                 .toList();
     }
 
-
+    @Transactional(readOnly = true)
     public Page<GameMyPageResponse> findAllVotedGames(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
 
@@ -158,6 +164,7 @@ public class MyPageService {
         return new PageImpl<>(responses, pageable, responses.size());
     }
 
+    @Transactional(readOnly = true)
     public Page<GameMyPageResponse> findAllGamesByMember(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
         Page<GameSet> gameSets = gameSetRepository.findAllByMemberIdOrderByEditedAtDesc(member.getId(), pageable);
@@ -194,6 +201,7 @@ public class MyPageService {
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.INVALID_SOURCE_TYPE));
     }
 
+    @Transactional(readOnly = true)
     public MemberActivityResponse getMemberActivity(ApiMember apiMember) {
         Member member = apiMember.toMember(memberRepository);
         return MemberActivityResponse.fromEntity(member);
