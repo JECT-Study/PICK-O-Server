@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface GameSetRepository extends JpaRepository<GameSet, Long> {
+public interface GameSetRepository extends JpaRepository<GameSet, Long> , GameSetRepositoryCustom{
 
     Page<GameSet> findAllByMemberIdOrderByEditedAtDesc(Long memberId, Pageable pageable);
 
@@ -23,7 +23,7 @@ public interface GameSetRepository extends JpaRepository<GameSet, Long> {
     List<GameSet> findGamesByViews(@Param("name") String mainTag, Pageable pageable);
 
     @Query("SELECT g FROM GameSet g "
-            + "ORDER BY g.views DESC, " 
+            + "ORDER BY g.views DESC, "
             + "g.createdAt DESC")
     List<GameSet> findPopularGames(Pageable pageable);
 }
