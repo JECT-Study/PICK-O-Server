@@ -60,7 +60,7 @@ public class GameSet extends BaseTimeEntity {
     @ColumnDefault("0")
     private long views;
 
-    @Size(max = 10)
+    @Size(max = 32)
     private String subTag;
 
     @PositiveOrZero

@@ -30,8 +30,6 @@ import balancetalk.vote.domain.VoteOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -153,14 +151,28 @@ public class GameService {
 
     @Transactional
     public GameSetDetailResponse findBalanceGameSet(final Long gameSetId, final GuestOrApiMember guestOrApiMember) {
+        GameSet gameSet = getGameSetById(gameSetId);
+        return getGameSetDetailResponse(gameSet, guestOrApiMember);
+    }
+
+    @Transactional
+    public GameSetDetailResponse findRandomGame(final GuestOrApiMember guestOrApiMember) {
+        Long randomGameSetId = gameSetRepository.findRandomGameSetId();
+        GameSet gameSet = getGameSetById(randomGameSetId);
+        return getGameSetDetailResponse(gameSet, guestOrApiMember);
+    }
+    
+    private GameSet getGameSetById(Long gameSetId) {
         GameSet gameSet = gameSetRepository.findById(gameSetId)
                 .orElseThrow(() -> new BalanceTalkException(ErrorCode.NOT_FOUND_BALANCE_GAME_SET));
         gameSet.increaseViews();
+        return gameSet;
+    }
 
-        Map<Long, String> gameOptionImgUrls = getGameOptionImgUrls(gameSet); // 게임 id, 이미지 url을 가진 맵을 생성
+    private GameSetDetailResponse getGameSetDetailResponse(GameSet gameSet, GuestOrApiMember guestOrApiMember) {
+        Map<Long, String> gameOptionImgUrls = getGameOptionImgUrls(gameSet); // 게임 ID, 이미지 URL을 가진 맵 생성
 
         if (guestOrApiMember.isGuest()) { // 비회원인 경우
-            // 게스트인 경우 북마크, 선택 옵션 없음
             return GameSetDetailResponse.fromEntity(gameSet, null, false,
                     gameSet.getGames().stream()
                             .map(game -> GameDetailResponse.fromEntity(game, false, null, gameOptionImgUrls))
@@ -168,20 +180,13 @@ public class GameService {
         }
 
         Member member = guestOrApiMember.toMember(memberRepository);
-        List<Game> games = gameSet.getGames();
-
-        GameBookmark gameBookmark = member.getGameBookmarkOf(gameSet)
-                .orElse(null);
-
-        Map<Long, VoteOption> voteOptionMap = new ConcurrentHashMap<>();
-
+        GameBookmark gameBookmark = member.getGameBookmarkOf(gameSet).orElse(null);
         boolean isEndGameSet = (gameBookmark != null) && gameBookmark.getIsEndGameSet();
 
-        for (Game game : games) {
-            Optional<GameVote> myVote = member.getVoteOnGameOption(member, game);
-
-            myVote.ifPresent(gameVote -> voteOptionMap.put(game.getId(), gameVote.getVoteOption()));
-        }
+        Map<Long, VoteOption> voteOptionMap = gameSet.getGames().stream()
+                .map(game -> Map.entry(game.getId(),
+                        member.getVoteOnGameOption(member, game).map(GameVote::getVoteOption).orElse(null)))
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return GameSetDetailResponse.fromEntity(gameSet, gameBookmark, isEndGameSet,
                 gameSet.getGames().stream()
