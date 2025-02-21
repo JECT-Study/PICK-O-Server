@@ -1,5 +1,6 @@
 package balancetalk.talkpick.application;
 
+import static balancetalk.file.domain.FileType.MEMBER;
 import static balancetalk.file.domain.FileType.TALK_PICK;
 import static balancetalk.global.exception.ErrorCode.NOT_FOUND_TALK_PICK;
 import static balancetalk.talkpick.dto.TalkPickDto.CreateTalkPickRequest;
@@ -57,8 +58,11 @@ public class TalkPickService {
         List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPickId, TALK_PICK);
         List<Long> fileIds = fileRepository.findIdsByResourceIdAndFileType(talkPickId, TALK_PICK);
 
+        String writerImgUrl = fileRepository.findImgUrlByResourceIdAndFileType(talkPick.getMemberId(), MEMBER)
+                .orElse(null);
+
         if (guestOrApiMember.isGuest()) {
-            return TalkPickDetailResponse.from(talkPick, imgUrls, fileIds, false, null);
+            return TalkPickDetailResponse.from(talkPick, writerImgUrl, imgUrls, fileIds, false, null);
         }
 
         Member member = guestOrApiMember.toMember(memberRepository);
@@ -66,10 +70,15 @@ public class TalkPickService {
         Optional<TalkPickVote> myVote = member.getVoteOnTalkPick(talkPick);
 
         if (myVote.isEmpty()) {
-            return TalkPickDetailResponse.from(talkPick, imgUrls, fileIds, hasBookmarked, null);
+            return TalkPickDetailResponse.from(talkPick, writerImgUrl, imgUrls, fileIds, hasBookmarked, null);
         }
 
-        return TalkPickDetailResponse.from(talkPick, imgUrls, fileIds, hasBookmarked, myVote.get().getVoteOption());
+        return TalkPickDetailResponse.from(talkPick,
+                writerImgUrl,
+                imgUrls,
+                fileIds,
+                hasBookmarked,
+                myVote.get().getVoteOption());
     }
 
     public Page<TalkPickResponse> findPaged(Pageable pageable) {
