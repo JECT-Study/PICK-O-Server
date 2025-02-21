@@ -55,10 +55,6 @@ public class TalkPickDto {
                     .editedAt(LocalDateTime.now())
                     .build();
         }
-
-        public boolean containsFileIds() {
-            return fileIds != null;
-        }
     }
 
     @Schema(description = "톡픽 수정 요청")
@@ -87,18 +83,6 @@ public class TalkPickDto {
                     .summaryStatus(SummaryStatus.PENDING)
                     .editedAt(LocalDateTime.now())
                     .build();
-        }
-
-        public boolean containsNewFileIds() {
-            return newFileIds != null && !newFileIds.isEmpty();
-        }
-
-        public boolean containsDeleteFileIds() {
-            return deleteFileIds != null && !deleteFileIds.isEmpty();
-        }
-
-        public boolean notContainsAnyFileIds() {
-            return !containsNewFileIds() && !containsDeleteFileIds();
         }
     }
 
