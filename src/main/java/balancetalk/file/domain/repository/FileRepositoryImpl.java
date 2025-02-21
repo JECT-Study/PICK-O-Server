@@ -6,6 +6,7 @@ import balancetalk.file.domain.File;
 import balancetalk.file.domain.FileType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -49,13 +50,10 @@ public class FileRepositoryImpl implements FileRepositoryCustom {
     }
 
     @Override
-    public Long findIdByResourceIdAndFileType(Long resourceId, FileType fileType) {
-        return queryFactory.select(file.id)
+    public Optional<String> findImgUrlByResourceIdAndFileType(Long resourceId, FileType fileType) {
+        return Optional.ofNullable(queryFactory.select(file.imgUrl)
                 .from(file)
-                .where(
-                        file.resourceId.eq(resourceId),
-                        file.fileType.eq(fileType)
-                )
-                .fetchOne();
+                .where(file.fileType.eq(fileType), file.resourceId.eq(resourceId))
+                .fetchOne());
     }
 }

@@ -55,10 +55,6 @@ public class TalkPickDto {
                     .editedAt(LocalDateTime.now())
                     .build();
         }
-
-        public boolean containsFileIds() {
-            return fileIds != null;
-        }
     }
 
     @Schema(description = "톡픽 수정 요청")
@@ -87,18 +83,6 @@ public class TalkPickDto {
                     .summaryStatus(SummaryStatus.PENDING)
                     .editedAt(LocalDateTime.now())
                     .build();
-        }
-
-        public boolean containsNewFileIds() {
-            return newFileIds != null && !newFileIds.isEmpty();
-        }
-
-        public boolean containsDeleteFileIds() {
-            return deleteFileIds != null && !deleteFileIds.isEmpty();
-        }
-
-        public boolean notContainsAnyFileIds() {
-            return !containsNewFileIds() && !containsDeleteFileIds();
         }
     }
 
@@ -148,6 +132,9 @@ public class TalkPickDto {
         @Schema(description = "작성자 닉네임", example = "hj30")
         private String writer;
 
+        @Schema(description = "작성자 프로필 이미지 URL", example = "https://test.net/image.png")
+        private String writerProfileImgUrl;
+
         @Schema(description = "작성일", example = "2024-08-04")
         private LocalDate createdAt;
 
@@ -155,6 +142,7 @@ public class TalkPickDto {
         private Boolean isEdited;
 
         public static TalkPickDetailResponse from(TalkPick entity,
+                                                  String writerProfileImgUrl,
                                                   List<String> imgUrls,
                                                   List<Long> fileIds,
                                                   boolean myBookmark,
@@ -179,6 +167,7 @@ public class TalkPickDto {
                     .myBookmark(myBookmark)
                     .votedOption(votedOption)
                     .writer(entity.getWriterNickname())
+                    .writerProfileImgUrl(writerProfileImgUrl)
                     .createdAt(entity.getCreatedAt().toLocalDate())
                     .isEdited(entity.isEdited())
                     .build();

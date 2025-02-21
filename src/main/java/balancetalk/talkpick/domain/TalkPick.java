@@ -122,6 +122,10 @@ public class TalkPick extends BaseTimeEntity {
         return this.member.getNickname();
     }
 
+    public Long getMemberId() {
+        return this.member.getId();
+    }
+
     public void increaseBookmarks() {
         this.bookmarks++;
     }
