@@ -110,7 +110,6 @@ public class GameDto {
                 VoteOption votedOption,
                 Map<Long, String> gameOptionImgUrls
         ) {
-
             return GameDetailResponse.builder()
                     .id(game.getId())
                     .description(game.getDescription())
