@@ -1,5 +1,7 @@
 package balancetalk.member.application;
 
+import static balancetalk.file.domain.FileType.TALK_PICK;
+
 import balancetalk.bookmark.domain.GameBookmark;
 import balancetalk.bookmark.domain.TalkPickBookmark;
 import balancetalk.bookmark.domain.GameBookmarkRepository;
@@ -66,7 +68,9 @@ public class MyPageService {
         List<TalkPickMyPageResponse> responses = bookmarks.stream()
                 .map(bookmark -> {
                     TalkPick talkPick = bookmark.getTalkPick();
-                    return TalkPickMyPageResponse.from(talkPick, bookmark);
+                    List<String> imgUrls =
+                            fileRepository.findImgUrlsByResourceIdAndFileType(talkPick.getId(), TALK_PICK);
+                    return TalkPickMyPageResponse.from(talkPick, bookmark, imgUrls);
                 })
                 .toList();
 
@@ -79,7 +83,11 @@ public class MyPageService {
         Page<TalkPickVote> votes = talkPickVoteRepository.findAllByMemberIdAndTalkPickDesc(member.getId(), pageable);
 
         List<TalkPickMyPageResponse> responses = votes.stream()
-                .map(vote -> TalkPickMyPageResponse.from(vote.getTalkPick(), vote))
+                .map(vote -> {
+                    Long talkPickId = vote.getTalkPick().getId();
+                    List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPickId, TALK_PICK);
+                    return TalkPickMyPageResponse.from(vote.getTalkPick(), vote, imgUrls);
+                })
                 .toList();
 
         return new PageImpl<>(responses, pageable, votes.getTotalElements());
@@ -92,7 +100,11 @@ public class MyPageService {
                 commentRepository.findAllLatestCommentsByMemberIdAndOrderByDesc(member.getId(), pageable);
 
         List<TalkPickMyPageResponse> responses = comments.stream()
-                .map(comment -> TalkPickMyPageResponse.from(comment.getTalkPick(), comment))
+                .map(comment -> {
+                    Long talkPickId = comment.getTalkPick().getId();
+                    List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPickId, TALK_PICK);
+                    return TalkPickMyPageResponse.from(comment.getTalkPick(), comment, imgUrls);
+                })
                 .toList();
 
         return new PageImpl<>(responses, pageable, comments.getTotalElements());
@@ -101,10 +113,13 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public Page<TalkPickMyPageResponse> findAllTalkPicksByMember(ApiMember apiMember, Pageable pageable) {
         Member member = apiMember.toMember(memberRepository);
-        Page<TalkPick> talkPicks = talkPickRepository.findAllByMemberIdOrderByEditedAtDesc(member.getId(), pageable);
+        Page<TalkPick> talkPicks = talkPickRepository.findAllByMemberOrderByEditedAtDesc(member, pageable);
 
         List<TalkPickMyPageResponse> responses = talkPicks.stream()
-                .map(TalkPickMyPageResponse::fromMyTalkPick)
+                .map(talkPick -> {
+                    List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPick.getId(), TALK_PICK);
+                    return TalkPickMyPageResponse.fromMyTalkPick(talkPick, imgUrls);
+                })
                 .toList();
 
         return new PageImpl<>(responses, pageable, talkPicks.getTotalElements());
