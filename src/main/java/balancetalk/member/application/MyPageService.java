@@ -117,7 +117,8 @@ public class MyPageService {
 
         List<TalkPickMyPageResponse> responses = talkPicks.stream()
                 .map(talkPick -> {
-                    List<String> imgUrls = fileRepository.findImgUrlsByResourceIdAndFileType(talkPick.getId(), TALK_PICK);
+                    List<String> imgUrls =
+                            fileRepository.findImgUrlsByResourceIdAndFileType(talkPick.getId(), TALK_PICK);
                     return TalkPickMyPageResponse.fromMyTalkPick(talkPick, imgUrls);
                 })
                 .toList();
