@@ -238,11 +238,19 @@ public class TalkPickDto {
         @Schema(description = "댓글 개수", example = "2")
         private long commentCount;
 
+        @Schema(description = "톡픽 작성 시 첨부한 이미지 URL 목록",
+                example = "["
+                        + "\"https://picko-image.amazonaws.com/temp-talk-pick/ad80-a94e083301d2_czz.png\",\n"
+                        + "\"https://picko-image.amazonaws.com/temp-talk-pick/957e6ed4830b_prom.jpeg\""
+                        + "]")
+        private List<String> imgUrls;
+
         @Schema(description = "최종 수정일(마이페이지 등록 날짜)")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
         private LocalDateTime editedAt;
 
-        public static TalkPickMyPageResponse from(TalkPick talkPick, TalkPickBookmark talkPickBookmark) {
+        public static TalkPickMyPageResponse from(TalkPick talkPick, TalkPickBookmark talkPickBookmark,
+                                                  List<String> imgUrls) {
             return TalkPickMyPageResponse.builder()
                     .id(talkPick.getId())
                     .title(talkPick.getTitle())
@@ -250,38 +258,42 @@ public class TalkPickDto {
                     .isBookmarked(talkPickBookmark.isActive())
                     .bookmarks(talkPick.getBookmarks())
                     .commentCount(!talkPick.getComments().isEmpty() ? talkPick.getComments().size() : 0)
+                    .imgUrls(imgUrls)
                     .editedAt(talkPick.getEditedAt())
                     .build();
         }
 
-        public static TalkPickMyPageResponse from(TalkPick talkPick, TalkPickVote vote) {
+        public static TalkPickMyPageResponse from(TalkPick talkPick, TalkPickVote vote, List<String> imgUrls) {
             return TalkPickMyPageResponse.builder()
                     .id(talkPick.getId())
                     .title(talkPick.getTitle())
                     .voteOption(vote.getVoteOption())
                     .bookmarks(talkPick.getBookmarks())
                     .commentCount(!talkPick.getComments().isEmpty() ? talkPick.getComments().size() : 0)
+                    .imgUrls(imgUrls)
                     .editedAt(talkPick.getEditedAt())
                     .build();
         }
 
-        public static TalkPickMyPageResponse from(TalkPick talkPick, Comment comment) {
+        public static TalkPickMyPageResponse from(TalkPick talkPick, Comment comment, List<String> imgUrls) {
             return TalkPickMyPageResponse.builder()
                     .id(talkPick.getId())
                     .title(talkPick.getTitle())
                     .commentContent(comment.getContent())
                     .bookmarks(talkPick.getBookmarks())
                     .commentCount(!talkPick.getComments().isEmpty() ? talkPick.getComments().size() : 0)
+                    .imgUrls(imgUrls)
                     .editedAt(talkPick.getEditedAt())
                     .build();
         }
 
-        public static TalkPickMyPageResponse fromMyTalkPick(TalkPick talkPick) {
+        public static TalkPickMyPageResponse fromMyTalkPick(TalkPick talkPick, List<String> imgUrls) {
             return TalkPickMyPageResponse.builder()
                     .id(talkPick.getId())
                     .title(talkPick.getTitle())
                     .bookmarks(talkPick.getBookmarks())
                     .commentCount(!talkPick.getComments().isEmpty() ? talkPick.getComments().size() : 0)
+                    .imgUrls(imgUrls)
                     .editedAt(talkPick.getEditedAt())
                     .build();
         }
