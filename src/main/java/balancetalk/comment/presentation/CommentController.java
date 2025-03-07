@@ -52,6 +52,16 @@ public class CommentController {
         return commentService.findAllComments(talkPickId, sortedByCreatedAtDesc, guestOrApiMember);
     }
 
+    @GetMapping("/m")
+    @Operation(summary = "모바일 - 최신 댓글 목록 조회",
+            description = "talkPick-id에 해당하는 게시글에 있는 모든 댓글을 최신순으로 정렬해 조회한다.")
+    public List<LatestCommentResponse> findAllCommentsByPostIdSortedByCreatedAtMobile(
+            @PathVariable Long talkPickId,
+            @Parameter(hidden = true) @AuthPrincipal GuestOrApiMember guestOrApiMember) {
+
+        return commentService.findAllCommentsWhenMobile(talkPickId, guestOrApiMember);
+    }
+
     @GetMapping("/best")
     @Operation(summary = "베스트 댓글 목록 조회", description = "talkPick-id에 해당하는 게시글에 있는 모든 댓글을 베스트 및 좋아요 순으로 정렬해 조회한다.")
     public Page<BestCommentResponse> findAllBestCommentsByPostId(@PathVariable Long talkPickId, Pageable pageable,
