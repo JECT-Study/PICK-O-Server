@@ -134,6 +134,17 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
+    public List<LatestCommentResponse> findAllCommentsWhenMobile(Long talkPickId, GuestOrApiMember guestOrApiMember) {
+        validateTalkPickId(talkPickId);
+        talkPickRepository.findById(talkPickId)
+                .orElseThrow(() -> new BalanceTalkException(NOT_FOUND_TALK_PICK));
+
+        List<Comment> comments = commentRepository.findAllByTalkPickIdAndParentIsNullOrderByCreatedAtDesc(talkPickId);
+
+        return convertToLatestCommentResponse(comments, guestOrApiMember);
+    }
+
+    @Transactional(readOnly = true)
     public List<LatestCommentResponse> findAllReplies(Long parentId, Long talkPickId,
                                                       GuestOrApiMember guestOrApiMember) {
 

@@ -12,6 +12,8 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findAllByTalkPickIdAndParentIsNull(Long talkPickId, Pageable pageable);
 
+    List<Comment> findAllByTalkPickIdAndParentIsNullOrderByCreatedAtDesc(Long talkPickId);
+
     @Query("SELECT c FROM Comment c WHERE c.parent.id = :parentId " +
             "ORDER BY CASE WHEN c.member.id = :currentMemberId THEN 0 ELSE 1 END, c.createdAt ASC")
     List<Comment> findAllRepliesByParentIdOrderByMemberAndCreatedAt(@Param("parentId") Long parentId,
